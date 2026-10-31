@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}Operational Service Areas — {{ ngo.name }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <div class="dashboard-sidebar">
+        <div class="mb-4">
+            <h6 class="text-uppercase fw-bold text-muted small">NGO Operations</h6>
+            <div class="fw-bold text-primary">{{ ngo.name }}</div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'dashboard:ngo_dashboard' %}" class="sidebar-nav-item"><i class="bi bi-speedometer2"></i> Overview</a>
+            <a href="{% url 'donations:ngo_donations_list' %}" class="sidebar-nav-item"><i class="bi bi-gift"></i> Donations Queue</a>
+            <a href="{% url 'inventory:ngo_inventory_list' %}" class="sidebar-nav-item"><i class="bi bi-bookshelf"></i> Warehouse Inventory</a>
+            <a href="{% url 'requests:ngo_students_verification_queue' %}" class="sidebar-nav-item"><i class="bi bi-person-vcard"></i> Student Verifications</a>
+            <a href="{% url 'requests:ngo_requests_queue' %}" class="sidebar-nav-item"><i class="bi bi-mortarboard"></i> Book Requests</a>
+            <a href="{% url 'requests:ngo_deliveries_list' %}" class="sidebar-nav-item"><i class="bi bi-truck"></i> Deliveries &amp; Dispatch</a>
+            <a href="{% url 'ngos:service_areas' %}" class="sidebar-nav-item active"><i class="bi bi-geo-alt"></i> Service Areas</a>
+            <a href="{% url 'ngos:staff_list' %}" class="sidebar-nav-item"><i class="bi bi-people"></i> Staff Management</a>
+        </nav>
+    </div>
+
+    <div class="dashboard-content">
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="card-bb p-4">
+                    <h4 class="fw-bold mb-1">Active Coverage Areas</h4>
+                    <p class="text-muted small mb-3">Cities where {{ ngo.name }} volunteers can pickup donated books and fulfill student deliveries.</p>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>City</th>
+                                    <th>State</th>
+                                    <th>Postal Code</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for area in areas %}
+                                    <tr>
+                                        <td class="fw-bold">{{ area.city }}</td>
+                                        <td>{{ area.state }}</td>
+                                        <td>{{ area.postal_code|default:"All Pincodes" }}</td>
+                                        <td>
+                                            <span class="badge {% if area.is_active %}badge-approved{% else %}badge-rejected{% endif %}">
+                                                {% if area.is_active %}Active{% else %}Inactive{% endif %}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <a href="{% url 'ngos:service_area_delete' area.id %}" class="btn btn-sm btn-outline-danger" data-confirm="Remove this coverage area?">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4 text-muted">No custom service areas configured yet.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card-bb p-4">
+                    <h5 class="fw-bold mb-3">Add Service Coverage Area</h5>
+                    <form method="post" action="{% url 'ngos:service_area_create' %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">City Name <span class="text-danger">*</span></label>
+                            {{ form.city }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">State <span class="text-danger">*</span></label>
+                            {{ form.state }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Postal / PIN Code (Optional)</label>
+                            {{ form.postal_code }}
+                        </div>
+                        <div class="form-check mb-3">
+                            {{ form.is_active }}
+                            <label class="form-check-label fw-semibold" for="{{ form.is_active.id_for_label }}">Active for Pickups &amp; Deliveries</label>
+                        </div>
+                        <button type="submit" class="btn btn-bb-primary w-100">
+                            <i class="bi bi-plus-circle me-1"></i> Add Service Area
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

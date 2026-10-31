@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}Book Requests Queue — {{ ngo.name }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <div class="dashboard-sidebar">
+        <div class="mb-4">
+            <h6 class="text-uppercase fw-bold text-muted small">NGO Operations</h6>
+            <div class="fw-bold text-primary">{{ ngo.name }}</div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'dashboard:ngo_dashboard' %}" class="sidebar-nav-item"><i class="bi bi-speedometer2"></i> Overview</a>
+            <a href="{% url 'donations:ngo_donations_list' %}" class="sidebar-nav-item"><i class="bi bi-gift"></i> Donations Queue</a>
+            <a href="{% url 'inventory:ngo_inventory_list' %}" class="sidebar-nav-item"><i class="bi bi-bookshelf"></i> Warehouse Inventory</a>
+            <a href="{% url 'requests:ngo_students_verification_queue' %}" class="sidebar-nav-item"><i class="bi bi-person-vcard"></i> Student Verifications</a>
+            <a href="{% url 'requests:ngo_requests_queue' %}" class="sidebar-nav-item active"><i class="bi bi-mortarboard"></i> Book Requests</a>
+            <a href="{% url 'requests:ngo_deliveries_list' %}" class="sidebar-nav-item"><i class="bi bi-truck"></i> Deliveries &amp; Dispatch</a>
+            <a href="{% url 'ngos:service_areas' %}" class="sidebar-nav-item"><i class="bi bi-geo-alt"></i> Service Areas</a>
+            <a href="{% url 'ngos:staff_list' %}" class="sidebar-nav-item"><i class="bi bi-people"></i> Staff Management</a>
+        </nav>
+    </div>
+
+    <div class="dashboard-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-1">Student Book Requests Queue</h3>
+                <p class="text-muted small mb-0">Evaluate educational purpose and execute atomic inventory allocations</p>
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <ul class="nav nav-pills mb-4 gap-2">
+            <li class="nav-item">
+                <a class="nav-link {% if tab == 'pending' %}active bg-primary{% else %}bg-white border text-dark{% endif %}" href="?tab=pending">
+                    Awaiting Review <span class="badge bg-danger ms-1">{{ counts.pending }}</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if tab == 'approved' %}active bg-primary{% else %}bg-white border text-dark{% endif %}" href="?tab=approved">
+                    Allocated <span class="badge bg-success ms-1">{{ counts.approved }}</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if tab == 'waitlisted' %}active bg-primary{% else %}bg-white border text-dark{% endif %}" href="?tab=waitlisted">
+                    Waitlisted <span class="badge bg-warning text-dark ms-1">{{ counts.waitlisted }}</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if tab == 'completed' %}active bg-primary{% else %}bg-white border text-dark{% endif %}" href="?tab=completed">
+                    Completed ({{ counts.completed }})
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if tab == 'all' %}active bg-primary{% else %}bg-white border text-dark{% endif %}" href="?tab=all">
+                    All Requests ({{ counts.all }})
+                </a>
+            </li>
+        </ul>
+
+        <!-- Search Bar -->
+        <div class="card-bb p-3 mb-4">
+            <form method="get" class="row g-2">
+                <input type="hidden" name="tab" value="{{ tab }}">
+                <div class="col-md-10">
+                    <input type="text" name="q" class="form-control" placeholder="Search by book title, student name, or delivery city..." value="{{ search_query }}">
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-outline-primary">Search</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Requests Table -->
+        <div class="card-bb overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Book Requested</th>
+                            <th>Student &amp; Institution</th>
+                            <th>Eligibility Status</th>
+                            <th>Urgency</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for req in page_obj %}
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-dark">{{ req.inventory_copy.book_title }}</div>
+                                    <div class="small text-muted font-monospace">SKU: {{ req.inventory_copy.tracking_code }}</div>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">{{ req.student.full_name }}</div>
+                                    <div class="small text-muted">{{ req.student.student_profile.institution_name }}</div>
+                                </td>
+                                <td>
+                                    {% if req.student.student_profile.is_verified %}
+                                        <span class="badge badge-verified"><i class="bi bi-patch-check-fill"></i> Verified Student</span>
+                                    {% else %}
+                                        <span class="badge badge-pending">Pending ID Check</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if req.urgent_need %}
+                                        <span class="badge bg-danger">Urgent Exam</span>
+                                    {% else %}
+                                        <span class="text-muted small">Standard</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge badge-{{ req.status|lower }}">{{ req.get_status_display }}</span>
+                                </td>
+                                <td class="small text-muted">{{ req.created_at|date:"M d, Y" }}</td>
+                                <td class="text-end">
+                                    <a href="{% url 'requests:ngo_request_review_detail' req.id %}" class="btn btn-sm btn-primary">
+                                        Inspect &amp; Allocate <i class="bi bi-chevron-right ms-1"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="bi bi-inbox display-5"></i>
+                                    <p class="mt-2">No book requests found in this queue.</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&tab={{ tab }}&q={{ search_query }}">Previous</a></li>
+                    {% endif %}
+                    <li class="page-item active"><span class="page-link">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+                    {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&tab={{ tab }}&q={{ search_query }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

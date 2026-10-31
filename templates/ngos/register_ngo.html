@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}Register Non-Profit Partner — BookBridge{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card-bb shadow-sm overflow-hidden">
+                <div class="bg-dark text-white p-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="stat-icon bg-white text-dark fs-3 rounded-circle">
+                            <i class="bi bi-building-add"></i>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-1 text-white">NGO Partner Registration</h3>
+                            <p class="mb-0 text-white-50 small">Apply as an authorized distribution partner on BookBridge</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 p-md-5">
+                    <div class="alert alert-warning d-flex align-items-start gap-2 mb-4">
+                        <i class="bi bi-shield-exclamation fs-5 mt-1"></i>
+                        <div class="small">
+                            <strong>Platform Governance:</strong> All registered NGOs undergo identity, society/trust registration, and operational area verification by platform administrators before activation.
+                        </div>
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">1. Organization Details</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-7">
+                                <label class="form-label fw-semibold">NGO / Trust Legal Name <span class="text-danger">*</span></label>
+                                {{ form.name }}
+                                {% if form.name.errors %}<div class="text-danger small mt-1">{{ form.name.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label fw-semibold">Society / Trust Reg No. <span class="text-danger">*</span></label>
+                                {{ form.registration_number }}
+                                {% if form.registration_number.errors %}<div class="text-danger small mt-1">{{ form.registration_number.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Official Email <span class="text-danger">*</span></label>
+                                {{ form.email }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Contact Phone <span class="text-danger">*</span></label>
+                                {{ form.phone }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Website (Optional)</label>
+                                {{ form.website }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Organization Logo</label>
+                                {{ form.logo }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Head Office Physical Address <span class="text-danger">*</span></label>
+                                {{ form.address }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">City <span class="text-danger">*</span></label>
+                                {{ form.city }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">State <span class="text-danger">*</span></label>
+                                {{ form.state }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Postal Code <span class="text-danger">*</span></label>
+                                {{ form.postal_code }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">About Organization &amp; Distribution Capability <span class="text-danger">*</span></label>
+                                {{ form.description }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Mission Statement</label>
+                                {{ form.mission_statement }}
+                            </div>
+                        </div>
+
+                        <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">2. Initial Primary Service Area</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Coverage City <span class="text-danger">*</span></label>
+                                {{ form.primary_service_city }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Coverage State <span class="text-danger">*</span></label>
+                                {{ form.primary_service_state }}
+                            </div>
+                        </div>
+
+                        <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">3. Primary Administrator Account</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Admin Username <span class="text-danger">*</span></label>
+                                {{ form.admin_username }}
+                                {% if form.admin_username.errors %}<div class="text-danger small mt-1">{{ form.admin_username.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Admin Email <span class="text-danger">*</span></label>
+                                {{ form.admin_email }}
+                                {% if form.admin_email.errors %}<div class="text-danger small mt-1">{{ form.admin_email.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">First Name <span class="text-danger">*</span></label>
+                                {{ form.admin_first_name }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Last Name <span class="text-danger">*</span></label>
+                                {{ form.admin_last_name }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Phone <span class="text-danger">*</span></label>
+                                {{ form.admin_phone }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Password <span class="text-danger">*</span></label>
+                                {{ form.admin_password }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Confirm Password <span class="text-danger">*</span></label>
+                                {{ form.confirm_password }}
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-dark btn-lg py-3">
+                                <i class="bi bi-send-fill me-2"></i>Submit NGO Application
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

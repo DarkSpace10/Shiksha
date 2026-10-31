@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block title %}Warehouse Inventory — {{ ngo.name }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <div class="dashboard-sidebar">
+        <div class="mb-4">
+            <h6 class="text-uppercase fw-bold text-muted small">NGO Operations</h6>
+            <div class="fw-bold text-primary">{{ ngo.name }}</div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'dashboard:ngo_dashboard' %}" class="sidebar-nav-item"><i class="bi bi-speedometer2"></i> Overview</a>
+            <a href="{% url 'donations:ngo_donations_list' %}" class="sidebar-nav-item"><i class="bi bi-gift"></i> Donations Queue</a>
+            <a href="{% url 'inventory:ngo_inventory_list' %}" class="sidebar-nav-item active"><i class="bi bi-bookshelf"></i> Warehouse Inventory</a>
+            <a href="{% url 'requests:ngo_students_verification_queue' %}" class="sidebar-nav-item"><i class="bi bi-person-vcard"></i> Student Verifications</a>
+            <a href="{% url 'requests:ngo_requests_queue' %}" class="sidebar-nav-item"><i class="bi bi-mortarboard"></i> Book Requests</a>
+            <a href="{% url 'requests:ngo_deliveries_list' %}" class="sidebar-nav-item"><i class="bi bi-truck"></i> Deliveries &amp; Dispatch</a>
+            <a href="{% url 'ngos:service_areas' %}" class="sidebar-nav-item"><i class="bi bi-geo-alt"></i> Service Areas</a>
+            <a href="{% url 'ngos:staff_list' %}" class="sidebar-nav-item"><i class="bi bi-people"></i> Staff Management</a>
+        </nav>
+    </div>
+
+    <div class="dashboard-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-1">Warehouse Inventory &amp; Cataloguing</h3>
+                <p class="text-muted small mb-0">Inspected textbooks stored at {{ ngo.name }} facility</p>
+            </div>
+            <a href="{% url 'inventory:catalogue' %}?ngo={{ ngo.id }}" target="_blank" class="btn btn-outline-primary">
+                <i class="bi bi-box-arrow-up-right me-1"></i> Public View
+            </a>
+        </div>
+
+        <!-- Inventory Stats Ribbon -->
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-md-3">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-semibold">AVAILABLE</span>
+                            <h3 class="fw-bold text-success mb-0">{{ counts.available }}</h3>
+                        </div>
+                        <div class="stat-icon success"><i class="bi bi-check-circle"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-semibold">RESERVED</span>
+                            <h3 class="fw-bold text-warning mb-0">{{ counts.reserved }}</h3>
+                        </div>
+                        <div class="stat-icon warning"><i class="bi bi-bookmark"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-semibold">IN DISPATCH</span>
+                            <h3 class="fw-bold text-primary mb-0">{{ counts.allocated }}</h3>
+                        </div>
+                        <div class="stat-icon primary"><i class="bi bi-truck"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-semibold">DELIVERED</span>
+                            <h3 class="fw-bold text-info mb-0">{{ counts.delivered }}</h3>
+                        </div>
+                        <div class="stat-icon secondary"><i class="bi bi-box2-heart"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="card-bb p-3 mb-4">
+            <form method="get" class="row g-2">
+                <div class="col-md-7">
+                    <input type="text" name="q" class="form-control" placeholder="Search by book title, author, SKU or shelf location..." value="{{ search_query }}">
+                </div>
+                <div class="col-md-3">
+                    <select name="status" class="form-select">
+                        <option value="">All Inventory Statuses</option>
+                        {% for val, label in InventoryStatus.choices %}
+                            <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-outline-primary">Filter</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Inventory Table -->
+        <div class="card-bb overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Tracking SKU</th>
+                            <th>Book Title &amp; Details</th>
+                            <th>Physical Shelf</th>
+                            <th>Condition Grade</th>
+                            <th>Status</th>
+                            <th>Catalogue</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for copy in page_obj %}
+                            <tr>
+                                <td>
+                                    <span class="badge bg-dark font-monospace">{{ copy.tracking_code }}</span>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-dark">{{ copy.book_title }}</div>
+                                    <div class="small text-muted">{{ copy.author }} &bull; {{ copy.get_academic_level_display }}</div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">
+                                        <i class="bi bi-geo-alt me-1"></i>{{ copy.location_shelf }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary-subtle text-secondary small">{{ copy.get_condition_grade_display }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-{{ copy.status|lower }}">{{ copy.get_status_display }}</span>
+                                </td>
+                                <td>
+                                    {% if copy.is_published %}
+                                        <span class="badge bg-success-subtle text-success border">Published</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary-subtle text-secondary border">Hidden</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <a href="{% url 'inventory:book_detail' copy.id %}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                        View
+                                    </a>
+                                    <a href="{% url 'inventory:inventory_toggle_publish' copy.id %}" class="btn btn-sm {% if copy.is_published %}btn-outline-warning{% else %}btn-outline-success{% endif %}">
+                                        {% if copy.is_published %}Hide{% else %}Publish{% endif %}
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="bi bi-bookshelf display-5"></i>
+                                    <p class="mt-2">No inventory copies found in your facility.</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&status={{ status_filter }}&q={{ search_query }}">Previous</a></li>
+                    {% endif %}
+                    <li class="page-item active"><span class="page-link">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+                    {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&status={{ status_filter }}&q={{ search_query }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

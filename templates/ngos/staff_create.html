@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Staff Member — {{ ngo.name }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <div class="dashboard-sidebar">
+        <div class="mb-4">
+            <h6 class="text-uppercase fw-bold text-muted small">NGO Operations</h6>
+            <div class="fw-bold text-primary">{{ ngo.name }}</div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'dashboard:ngo_dashboard' %}" class="sidebar-nav-item"><i class="bi bi-speedometer2"></i> Overview</a>
+            <a href="{% url 'ngos:staff_list' %}" class="sidebar-nav-item active"><i class="bi bi-people"></i> Staff Management</a>
+        </nav>
+    </div>
+
+    <div class="dashboard-content">
+        <div class="card-bb p-4 p-md-5" style="max-width: 800px;">
+            <h3 class="fw-bold mb-1">Add Operational Staff Member</h3>
+            <p class="text-muted small mb-4">Grant access to reviews, inspections, inventory, and student verification</p>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Username <span class="text-danger">*</span></label>
+                        {{ form.username }}
+                        {% if form.username.errors %}<div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
+                        {{ form.email }}
+                        {% if form.email.errors %}<div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">First Name <span class="text-danger">*</span></label>
+                        {{ form.first_name }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Last Name <span class="text-danger">*</span></label>
+                        {{ form.last_name }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Phone Contact</label>
+                        {{ form.phone_number }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Initial Password <span class="text-danger">*</span></label>
+                        {{ form.password }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Staff Role Designation <span class="text-danger">*</span></label>
+                        {{ form.role }}
+                    </div>
+                </div>
+
+                <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">Granular Operational Permissions</h5>
+                <div class="row g-2 mb-4">
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            {{ form.can_review_donations }}
+                            <label class="form-check-label fw-semibold" for="{{ form.can_review_donations.id_for_label }}">Review &amp; Approve Book Donations</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            {{ form.can_schedule_pickups }}
+                            <label class="form-check-label fw-semibold" for="{{ form.can_schedule_pickups.id_for_label }}">Schedule Collection Pickups</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            {{ form.can_inspect_books }}
+                            <label class="form-check-label fw-semibold" for="{{ form.can_inspect_books.id_for_label }}">Perform Physical Quality Inspection</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            {{ form.can_manage_inventory }}
+                            <label class="form-check-label fw-semibold" for="{{ form.can_manage_inventory.id_for_label }}">Manage Warehouse Inventory</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            {{ form.can_verify_students }}
+                            <label class="form-check-label fw-semibold" for="{{ form.can_verify_students.id_for_label }}">Verify Student Eligibility</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            {{ form.can_review_requests }}
+                            <label class="form-check-label fw-semibold" for="{{ form.can_review_requests.id_for_label }}">Approve &amp; Allocate Book Requests</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            {{ form.can_manage_deliveries }}
+                            <label class="form-check-label fw-semibold" for="{{ form.can_manage_deliveries.id_for_label }}">Manage Dispatch &amp; Deliveries</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            {{ form.can_manage_staff }}
+                            <label class="form-check-label fw-semibold" for="{{ form.can_manage_staff.id_for_label }}">Manage Other Staff Members</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-bb-primary px-4">Create Staff Member</button>
+                    <a href="{% url 'ngos:staff_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

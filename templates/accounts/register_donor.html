@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}Register as Book Donor — BookBridge{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card-bb shadow-sm overflow-hidden">
+                <div class="bg-primary text-white p-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="stat-icon bg-white text-primary fs-3 rounded-circle">
+                            <i class="bi bi-gift-fill"></i>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-1 text-white">Donor Registration</h3>
+                            <p class="mb-0 text-white-50 small">List books from your home or institution and schedule easy NGO pickups</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 p-md-5">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">1. Account Credentials</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Username <span class="text-danger">*</span></label>
+                                {{ form.username }}
+                                {% if form.username.errors %}<div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
+                                {{ form.email }}
+                                {% if form.email.errors %}<div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Password <span class="text-danger">*</span></label>
+                                {{ form.password }}
+                                {% if form.password.errors %}<div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Confirm Password <span class="text-danger">*</span></label>
+                                {{ form.confirm_password }}
+                                {% if form.confirm_password.errors %}<div class="text-danger small mt-1">{{ form.confirm_password.errors.0 }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">2. Personal &amp; Contact Information</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">First Name <span class="text-danger">*</span></label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}<div class="text-danger small mt-1">{{ form.first_name.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Last Name <span class="text-danger">*</span></label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}<div class="text-danger small mt-1">{{ form.last_name.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Phone Number <span class="text-danger">*</span></label>
+                                {{ form.phone_number }}
+                                {% if form.phone_number.errors %}<div class="text-danger small mt-1">{{ form.phone_number.errors.0 }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">3. Default Address (For Book Pickups)</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Address Line <span class="text-danger">*</span></label>
+                                {{ form.address_line1 }}
+                                {% if form.address_line1.errors %}<div class="text-danger small mt-1">{{ form.address_line1.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">City <span class="text-danger">*</span></label>
+                                {{ form.city }}
+                                {% if form.city.errors %}<div class="text-danger small mt-1">{{ form.city.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">State <span class="text-danger">*</span></label>
+                                {{ form.state }}
+                                {% if form.state.errors %}<div class="text-danger small mt-1">{{ form.state.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Postal / PIN Code <span class="text-danger">*</span></label>
+                                {{ form.postal_code }}
+                                {% if form.postal_code.errors %}<div class="text-danger small mt-1">{{ form.postal_code.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Pickup Notes / Instructions (Optional)</label>
+                                {{ form.preferred_pickup_instructions }}
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-bb-primary btn-lg">
+                                <i class="bi bi-person-check-fill me-2"></i>Create Donor Account
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-4 text-muted small">
+                        Already have an account? <a href="{% url 'accounts:login' %}" class="fw-semibold text-primary">Sign in here</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

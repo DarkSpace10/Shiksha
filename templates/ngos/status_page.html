@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Application Status — {{ ngo.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 text-center">
+            <div class="card-bb p-5">
+                {% if ngo.status == 'PENDING' %}
+                    <div class="stat-icon warning mx-auto mb-3" style="width: 72px; height: 72px; font-size: 2.2rem;">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                    <h2 class="fw-bold text-dark mb-2">Application Under Review</h2>
+                    <p class="text-muted mb-4">
+                        Thank you for applying to join BookBridge! Your application for <strong>{{ ngo.name }}</strong> (Reg No: {{ ngo.registration_number }}) is currently under active review by platform administrators.
+                    </p>
+                    <div class="p-3 bg-light rounded-3 text-start mb-4 small">
+                        <div class="mb-1"><strong>Submitted On:</strong> {{ ngo.created_at|date:"F d, Y h:i A" }}</div>
+                        <div class="mb-1"><strong>Official Contact Email:</strong> {{ ngo.email }}</div>
+                        <div><strong>Headquarters:</strong> {{ ngo.city }}, {{ ngo.state }}</div>
+                    </div>
+                    <p class="text-muted small">You will receive an in-app notification and email once your organization is verified and approved.</p>
+
+                {% elif ngo.status == 'APPROVED' %}
+                    <div class="stat-icon success mx-auto mb-3" style="width: 72px; height: 72px; font-size: 2.2rem;">
+                        <i class="bi bi-patch-check-fill"></i>
+                    </div>
+                    <h2 class="fw-bold text-dark mb-2">Organization Verified &amp; Approved</h2>
+                    <p class="text-muted mb-4">
+                        <strong>{{ ngo.name }}</strong> is fully active on BookBridge. Your staff team can manage donations, schedule collections, conduct inspections, and allocate textbooks to students.
+                    </p>
+                    <a href="{% url 'dashboard:ngo_dashboard' %}" class="btn btn-bb-primary btn-lg">
+                        <i class="bi bi-speedometer2 me-2"></i>Go to NGO Operations Dashboard
+                    </a>
+
+                {% elif ngo.status == 'REJECTED' %}
+                    <div class="stat-icon danger mx-auto mb-3" style="width: 72px; height: 72px; font-size: 2.2rem;">
+                        <i class="bi bi-x-circle-fill"></i>
+                    </div>
+                    <h2 class="fw-bold text-danger mb-2">Application Not Approved</h2>
+                    <p class="text-muted mb-4">
+                        We regret to inform you that your organization application for <strong>{{ ngo.name }}</strong> could not be approved at this time.
+                    </p>
+                    {% if ngo.rejection_reason %}
+                        <div class="alert alert-danger text-start small mb-4">
+                            <strong>Reason:</strong> {{ ngo.rejection_reason }}
+                        </div>
+                    {% endif %}
+
+                {% elif ngo.status == 'SUSPENDED' %}
+                    <div class="stat-icon danger mx-auto mb-3" style="width: 72px; height: 72px; font-size: 2.2rem;">
+                        <i class="bi bi-slash-circle-fill"></i>
+                    </div>
+                    <h2 class="fw-bold text-danger mb-2">Organization Temporarily Suspended</h2>
+                    <p class="text-muted mb-4">
+                        Operations for <strong>{{ ngo.name }}</strong> have been temporarily paused by platform administration.
+                    </p>
+                    {% if ngo.rejection_reason %}
+                        <div class="alert alert-warning text-start small mb-4">
+                            <strong>Notice:</strong> {{ ngo.rejection_reason }}
+                        </div>
+                    {% endif %}
+                {% endif %}
+
+                <div class="mt-4 pt-3 border-top">
+                    <a href="{% url 'core:home' %}" class="btn btn-link text-decoration-none">Return to Homepage</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

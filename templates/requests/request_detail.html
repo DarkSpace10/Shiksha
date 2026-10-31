@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+
+{% block title %}Request Tracker — {{ book_request.inventory_copy.book_title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a href="{% url 'requests:student_requests_list' %}" class="btn btn-sm btn-outline-secondary mb-2">
+                <i class="bi bi-arrow-left me-1"></i> Back to Requests
+            </a>
+            <h2 class="fw-bold mb-0 text-dark">{{ book_request.inventory_copy.book_title }}</h2>
+            <div class="text-muted small">Managing NGO: {{ book_request.ngo.name }} &bull; SKU: {{ book_request.inventory_copy.tracking_code }}</div>
+        </div>
+        <span class="badge badge-{{ book_request.status|lower }} fs-6 px-3 py-2">
+            {{ book_request.get_status_display }}
+        </span>
+    </div>
+
+    <!-- Delivery Progress Bar / Timeline -->
+    <div class="card-bb p-4 mb-4">
+        <h6 class="text-uppercase fw-bold text-muted small mb-3">Request &amp; Delivery Progress</h6>
+        <ul class="workflow-timeline">
+            <!-- Step 1: Requested -->
+            <li class="timeline-step {% if book_request.status != 'REJECTED' and book_request.status != 'CANCELLED' %}completed{% else %}failed{% endif %}">
+                <div class="step-marker"><i class="bi bi-file-earmark-text"></i></div>
+                <span class="step-label">Requested</span>
+            </li>
+            <!-- Step 2: Verified & Approved -->
+            <li class="timeline-step {% if book_request.status in 'APPROVED,ALLOCATED,COMPLETED' %}completed{% elif book_request.status in 'PENDING,UNDER_REVIEW' %}active{% elif book_request.status == 'WAITLISTED' %}active{% else %}failed{% endif %}">
+                <div class="step-marker"><i class="bi bi-patch-check"></i></div>
+                <span class="step-label">NGO Verified</span>
+            </li>
+            <!-- Step 3: Allocated & Dispatched -->
+            <li class="timeline-step {% if delivery_job and delivery_job.status in 'DISPATCHED,OUT_FOR_DELIVERY,DELIVERED' or book_request.status == 'COMPLETED' %}completed{% elif book_request.status == 'ALLOCATED' %}active{% endif %}">
+                <div class="step-marker"><i class="bi bi-box-seam"></i></div>
+                <span class="step-label">Dispatched</span>
+            </li>
+            <!-- Step 4: Out for Delivery -->
+            <li class="timeline-step {% if delivery_job and delivery_job.status == 'DELIVERED' or book_request.status == 'COMPLETED' %}completed{% elif delivery_job and delivery_job.status == 'OUT_FOR_DELIVERY' %}active{% elif delivery_job and delivery_job.status == 'FAILED' %}failed{% endif %}">
+                <div class="step-marker"><i class="bi bi-truck"></i></div>
+                <span class="step-label">Out for Delivery</span>
+            </li>
+            <!-- Step 5: Confirmed Received -->
+            <li class="timeline-step {% if delivery_job and delivery_job.student_confirmed or book_request.status == 'COMPLETED' %}completed{% elif delivery_job and delivery_job.status == 'DELIVERED' %}active{% endif %}">
+                <div class="step-marker"><i class="bi bi-hand-thumbs-up"></i></div>
+                <span class="step-label">Receipt Confirmed</span>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Student Confirm Receipt Action Banner -->
+    {% if delivery_job and is_student_viewer %}
+        {% if not delivery_job.student_confirmed %}
+            <div class="card-bb p-4 mb-4 bg-success-subtle border-success">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <h4 class="fw-bold text-success mb-1"><i class="bi bi-box2-check-fill me-2"></i>Have You Received Your Book?</h4>
+                        <p class="mb-0 text-dark small">
+                            Consignment <strong>{{ delivery_job.tracking_number }}</strong> via <strong>{{ delivery_job.courier_name }}</strong>. Please confirm receipt to close the loop!
+                        </p>
+                    </div>
+                    <button type="button" class="btn btn-success btn-lg px-4 fw-semibold" data-bs-toggle="modal" data-bs-target="#confirmReceiptModal">
+                        <i class="bi bi-check-circle-fill me-2"></i>Confirm Receipt
+                    </button>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-success d-flex align-items-center gap-2 mb-4">
+                <i class="bi bi-check-circle-fill fs-4"></i>
+                <div>
+                    <strong>Delivered &amp; Receipt Confirmed:</strong> You confirmed safe delivery of this textbook on {{ delivery_job.student_confirmed_at|date:"F d, Y h:i A" }}.
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+
+    <div class="row g-4">
+        <!-- Request Details -->
+        <div class="col-lg-8">
+            <div class="card-bb p-4 mb-4">
+                <h5 class="fw-bold mb-3">Academic Request Purpose</h5>
+                <p class="text-muted">{{ book_request.educational_purpose }}</p>
+
+                {% if book_request.urgent_need %}
+                    <div class="alert alert-warning small mb-0">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                        <strong>Urgent Need Flagged:</strong> {{ book_request.urgency_reason|default:"Exam / semester deadline" }}
+                    </div>
+                {% endif %}
+
+                {% if book_request.rejection_reason %}
+                    <div class="alert alert-danger small mt-3 mb-0">
+                        <strong>NGO Review Feedback:</strong> {{ book_request.rejection_reason }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Delivery Details -->
+            {% if delivery_job %}
+                <div class="card-bb p-4 border-start border-4 border-primary">
+                    <h5 class="fw-bold text-primary mb-3"><i class="bi bi-truck me-2"></i>Shipment &amp; Logistics Tracker</h5>
+                    <div class="row g-3 small">
+                        <div class="col-sm-6"><strong>Consignment Tracking ID:</strong> <span class="badge bg-dark">{{ delivery_job.tracking_number }}</span></div>
+                        <div class="col-sm-6"><strong>Courier / Volunteer:</strong> {{ delivery_job.courier_name }}</div>
+                        <div class="col-sm-6"><strong>Shipment Status:</strong> <span class="badge badge-{{ delivery_job.status|lower }}">{{ delivery_job.get_status_display }}</span></div>
+                        <div class="col-sm-6"><strong>Dispatched Date:</strong> {{ delivery_job.dispatched_at|date:"M d, Y"|default:"Preparing" }}</div>
+                        {% if delivery_job.dispatch_notes %}
+                            <div class="col-12 mt-2"><strong>Dispatch Notes:</strong> {{ delivery_job.dispatch_notes }}</div>
+                        {% endif %}
+                        {% if delivery_job.failure_reason %}
+                            <div class="col-12 mt-2 text-danger"><strong>Delivery Issue Flagged:</strong> {{ delivery_job.failure_reason }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Side: Student Address & NGO Info -->
+        <div class="col-lg-4">
+            <div class="card-bb p-4 mb-4">
+                <h5 class="fw-bold mb-3">Destination Address</h5>
+                <p class="small text-muted mb-1">{{ book_request.delivery_address }}</p>
+                <p class="small text-muted mb-2">{{ book_request.delivery_city }}, {{ book_request.delivery_state }} - {{ book_request.delivery_postal_code }}</p>
+                <div class="small"><strong>Contact Phone:</strong> {{ book_request.contact_phone }}</div>
+            </div>
+
+            <div class="card-bb p-4">
+                <h5 class="fw-bold mb-3">Fulfilling NGO</h5>
+                <div class="fw-semibold text-primary mb-1">{{ book_request.ngo.name }}</div>
+                <div class="small text-muted mb-2"><i class="bi bi-geo-alt"></i> {{ book_request.ngo.city }}, {{ book_request.ngo.state }}</div>
+                <div class="small text-muted"><i class="bi bi-envelope"></i> {{ book_request.ngo.email }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Confirm Receipt -->
+{% if delivery_job %}
+<div class="modal fade" id="confirmReceiptModal" tabindex="-1" aria-labelledby="confirmReceiptModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'requests:student_confirm_receipt' delivery_job.id %}">
+                {% csrf_token %}
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title fw-bold" id="confirmReceiptModalLabel"><i class="bi bi-check-circle-fill me-2"></i>Confirm Book Receipt</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small">
+                        By confirming receipt, you verify that you have received <strong>{{ book_request.inventory_copy.book_title }}</strong> in good order from <strong>{{ book_request.ngo.name }}</strong>.
+                    </p>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Thank You Note / Donor Feedback (Optional)</label>
+                        {{ receipt_form.student_feedback }}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success fw-semibold">Yes, I Have Received This Book</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

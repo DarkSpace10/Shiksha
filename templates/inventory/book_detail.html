@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ copy.book_title }} — BookBridge Verified Textbook{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="mb-3">
+        <a href="{% url 'inventory:catalogue' %}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back to Catalogue
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left: Cover and Images -->
+        <div class="col-lg-5">
+            <div class="card-bb p-3 text-center mb-3">
+                {% if copy.cover_image %}
+                    <img src="{{ copy.cover_image.url }}" alt="{{ copy.book_title }}" class="img-fluid rounded shadow-sm" style="max-height: 420px; object-fit: contain;">
+                {% else %}
+                    <div class="p-5 text-muted bg-light rounded">
+                        <i class="bi bi-journal-bookmark display-1"></i>
+                        <div class="mt-2">{{ copy.get_category_display }}</div>
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if donation_images %}
+                <div class="card-bb p-3">
+                    <h6 class="fw-bold mb-2">Physical Condition Photos</h6>
+                    <div class="row g-2">
+                        {% for img in donation_images %}
+                            <div class="col-4">
+                                <a href="{{ img.image.url }}" target="_blank">
+                                    <img src="{{ img.image.url }}" alt="" class="rounded border w-100" style="height: 80px; object-fit: cover;">
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Right: Specifications and Request CTA -->
+        <div class="col-lg-7">
+            <div class="card-bb p-4 p-md-5">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="badge bg-primary-subtle text-primary border small">{{ copy.get_category_display }}</span>
+                    <span class="badge badge-{{ copy.status|lower }} fs-6">{{ copy.get_status_display }}</span>
+                </div>
+
+                <h2 class="fw-bold text-dark mb-1">{{ copy.book_title }}</h2>
+                <h5 class="text-muted fw-normal mb-3">By {{ copy.author }}</h5>
+
+                <!-- Verification Badges -->
+                <div class="d-flex flex-wrap gap-2 mb-4">
+                    <span class="badge bg-success-subtle text-success border border-success-subtle p-2">
+                        <i class="bi bi-patch-check-fill me-1"></i> Physically Inspected: {{ copy.get_condition_grade_display }}
+                    </span>
+                    <span class="badge bg-dark text-white p-2">
+                        SKU: {{ copy.tracking_code }}
+                    </span>
+                </div>
+
+                <!-- Specs Grid -->
+                <div class="p-3 bg-light rounded-3 mb-4">
+                    <div class="row g-2 small">
+                        <div class="col-sm-6"><strong>Academic Level:</strong> {{ copy.get_academic_level_display }}</div>
+                        <div class="col-sm-6"><strong>Subject:</strong> {{ copy.subject|default:"General Syllabus" }}</div>
+                        <div class="col-sm-6"><strong>Edition:</strong> {{ copy.edition|default:"Standard Edition" }}</div>
+                        <div class="col-sm-6"><strong>ISBN:</strong> {{ copy.isbn|default:"Not specified" }}</div>
+                        <div class="col-sm-6"><strong>Publisher:</strong> {{ copy.publisher|default:"Educational Press" }}</div>
+                        <div class="col-sm-6"><strong>Year:</strong> {{ copy.publication_year|default:"Recent" }}</div>
+                    </div>
+                </div>
+
+                <!-- NGO Custody Box -->
+                <div class="border rounded-3 p-3 mb-4 d-flex align-items-center gap-3">
+                    <div class="stat-icon primary rounded-circle">
+                        <i class="bi bi-building"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold text-dark">{{ copy.ngo.name }}</div>
+                        <div class="small text-muted"><i class="bi bi-geo-alt"></i> {{ copy.ngo.city }}, {{ copy.ngo.state }} &bull; Responsible for delivery &amp; verification</div>
+                    </div>
+                </div>
+
+                <!-- Request Action Box -->
+                <div class="pt-3 border-top">
+                    {% if copy.is_available %}
+                        {% if user.is_authenticated %}
+                            {% if user.is_student %}
+                                {% if has_active_request %}
+                                    <div class="alert alert-info">
+                                        <i class="bi bi-info-circle-fill me-1"></i> You have an active request in progress for this book copy.
+                                        <a href="{% url 'requests:student_requests_list' %}" class="fw-bold ms-2">Track Request</a>
+                                    </div>
+                                {% else %}
+                                    <a href="{% url 'requests:request_create' copy.id %}" class="btn btn-bb-secondary btn-lg w-100 py-3 shadow-sm">
+                                        <i class="bi bi-mortarboard-fill me-2"></i>Request This Textbook
+                                    </a>
+                                    <div class="small text-muted text-center mt-2">
+                                        <i class="bi bi-shield-check text-success"></i> 100% Free educational allocation &bull; NGO staff review educational relevance.
+                                    </div>
+                                {% endif %}
+                            {% else %}
+                                <div class="alert alert-warning">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i> You are logged in as a <strong>{{ user.get_role_display }}</strong>. Only student accounts can request textbook allocations.
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="p-3 bg-light rounded-3 text-center">
+                                <h6 class="fw-bold mb-2">Are you a student in need of this textbook?</h6>
+                                <p class="small text-muted mb-3">Sign in or register as a student to request free educational delivery.</p>
+                                <div class="d-flex justify-content-center gap-2">
+                                    <a href="{% url 'accounts:login' %}?next={% url 'inventory:book_detail' copy.id %}" class="btn btn-bb-primary">
+                                        Sign In to Request
+                                    </a>
+                                    <a href="{% url 'accounts:register_student' %}" class="btn btn-bb-secondary">
+                                        Register as Student
+                                    </a>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-secondary text-center mb-0">
+                            <i class="bi bi-lock-fill me-1"></i> This book is currently <strong>{{ copy.get_status_display }}</strong> and not open for new requests.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

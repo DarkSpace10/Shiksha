@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ ngo.name }} — Verified Partner NGO{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header Banner -->
+    <div class="card-bb p-4 p-md-5 mb-4 overflow-hidden position-relative">
+        <div class="d-flex flex-wrap align-items-center gap-4">
+            <div class="rounded-3 bg-light p-3 border d-flex align-items-center justify-content-center" style="width: 90px; height: 90px;">
+                {% if ngo.logo %}
+                    <img src="{{ ngo.logo.url }}" alt="{{ ngo.name }}" style="max-width: 75px; max-height: 75px; object-fit: contain;">
+                {% else %}
+                    <i class="bi bi-building text-primary fs-1"></i>
+                {% endif %}
+            </div>
+            <div class="flex-grow-1">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <h2 class="fw-bold mb-0 text-dark">{{ ngo.name }}</h2>
+                    <span class="badge badge-approved"><i class="bi bi-patch-check-fill"></i> Verified NGO</span>
+                </div>
+                <p class="text-muted mb-2"><i class="bi bi-geo-alt"></i> {{ ngo.city }}, {{ ngo.state }} &bull; Reg: {{ ngo.registration_number }}</p>
+                <div class="d-flex flex-wrap gap-3 small text-muted">
+                    {% if ngo.website %}
+                        <a href="{{ ngo.website }}" target="_blank" class="text-primary text-decoration-none"><i class="bi bi-globe me-1"></i>{{ ngo.website }}</a>
+                    {% endif %}
+                    <span><i class="bi bi-envelope me-1"></i>{{ ngo.email }}</span>
+                    <span><i class="bi bi-telephone me-1"></i>{{ ngo.phone }}</span>
+                </div>
+            </div>
+            <div>
+                <a href="{% url 'donations:donation_create' %}?ngo={{ ngo.id }}" class="btn btn-bb-primary btn-lg shadow-sm">
+                    <i class="bi bi-gift me-2"></i>Donate Books to this NGO
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Main Info -->
+        <div class="col-lg-8">
+            <div class="card-bb p-4 mb-4">
+                <h4 class="fw-bold mb-3">About the Organization</h4>
+                <p class="text-muted">{{ ngo.description }}</p>
+                {% if ngo.mission_statement %}
+                    <div class="p-3 bg-light rounded-3 mt-3 border-start border-3 border-primary">
+                        <h6 class="fw-bold text-dark mb-1">Mission Statement</h6>
+                        <p class="text-muted small mb-0">{{ ngo.mission_statement }}</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Available Books in this NGO -->
+            <div class="card-bb p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="fw-bold mb-0">Books In Custody at this NGO</h4>
+                    <a href="{% url 'inventory:catalogue' %}?ngo={{ ngo.id }}" class="btn btn-sm btn-outline-primary">
+                        View All ({{ available_books.count }})
+                    </a>
+                </div>
+
+                <div class="row g-3">
+                    {% for copy in available_books %}
+                        <div class="col-md-6">
+                            <div class="card-bb p-3 h-100 d-flex flex-column">
+                                <span class="badge bg-light text-dark border small align-self-start mb-2">{{ copy.get_academic_level_display }}</span>
+                                <h6 class="fw-bold text-dark mb-1 text-truncate" title="{{ copy.book_title }}">{{ copy.book_title }}</h6>
+                                <p class="text-muted small mb-2">By {{ copy.author }}</p>
+                                <div class="mt-auto d-flex justify-content-between align-items-center pt-2 border-top">
+                                    <span class="badge badge-available">Available</span>
+                                    <a href="{% url 'inventory:book_detail' copy.id %}" class="btn btn-sm btn-outline-primary">Details</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="col-12 py-3 text-center text-muted">
+                            <p>No books currently available from this NGO. Check back soon!</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Info -->
+        <div class="col-lg-4">
+            <div class="card-bb p-4 mb-4">
+                <h5 class="fw-bold mb-3">Operational Service Areas</h5>
+                <p class="text-muted small mb-3">Locations where this NGO conducts physical pickups from donors and book deliveries:</p>
+                <div class="d-flex flex-wrap gap-2">
+                    {% for area in service_areas %}
+                        <span class="badge bg-light text-dark border px-3 py-2">
+                            <i class="bi bi-geo-alt-fill text-primary me-1"></i>{{ area.city }}, {{ area.state }}
+                        </span>
+                    {% empty %}
+                        <span class="text-muted small">Headquarters Area ({{ ngo.city }})</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="card-bb p-4">
+                <h5 class="fw-bold mb-3">Distribution Impact</h5>
+                <div class="p-3 bg-light rounded-3 text-center mb-3">
+                    <div class="display-6 fw-bold text-success">{{ total_distributed }}</div>
+                    <div class="small text-muted text-uppercase fw-semibold">Books Delivered to Students</div>
+                </div>
+                <div class="small text-muted">
+                    <i class="bi bi-shield-check text-success me-1"></i> Verified non-profit status with platform audit history.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

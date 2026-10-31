@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Schedule Pickup — {{ donation.title }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <div class="dashboard-sidebar">
+        <div class="mb-4">
+            <h6 class="text-uppercase fw-bold text-muted small">NGO Operations</h6>
+            <div class="fw-bold text-primary">{{ ngo.name }}</div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'dashboard:ngo_dashboard' %}" class="sidebar-nav-item"><i class="bi bi-speedometer2"></i> Overview</a>
+            <a href="{% url 'donations:ngo_donations_list' %}" class="sidebar-nav-item active"><i class="bi bi-gift"></i> Donations Queue</a>
+        </nav>
+    </div>
+
+    <div class="dashboard-content">
+        <div class="card-bb p-4 p-md-5" style="max-width: 800px;">
+            <h3 class="fw-bold mb-1">Schedule Book Collection Pickup</h3>
+            <p class="text-muted small mb-4">Assign volunteer or courier team for book collection from donor</p>
+
+            <div class="p-3 bg-light rounded-3 mb-4">
+                <div class="fw-bold text-dark">{{ donation.title }}</div>
+                <div class="small text-muted mb-2">Donor: {{ donation.donor.full_name }} &bull; {{ donation.donor_contact_phone }}</div>
+                <div class="small"><strong>Pickup Address:</strong> {{ donation.pickup_address }}, {{ donation.pickup_city }}, {{ donation.pickup_state }} - {{ donation.pickup_postal_code }}</div>
+                {% if donation.preferred_pickup_time %}
+                    <div class="small text-primary mt-1"><strong>Donor Preferred Time:</strong> {{ donation.preferred_pickup_time }}</div>
+                {% endif %}
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Pickup Date <span class="text-danger">*</span></label>
+                        {{ form.scheduled_date }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Time Slot <span class="text-danger">*</span></label>
+                        {{ form.time_slot }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Assigned Agent / Volunteer Name</label>
+                        {{ form.assigned_agent_name }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Agent Phone Number</label>
+                        {{ form.assigned_agent_phone }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Instructions for Agent</label>
+                        {{ form.notes }}
+                    </div>
+                    <div class="col-12 mt-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-bb-primary px-4">Confirm Pickup Schedule</button>
+                        <a href="{% url 'donations:ngo_donations_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

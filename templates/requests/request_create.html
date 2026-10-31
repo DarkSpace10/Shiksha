@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Request Textbook — {{ copy.book_title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card-bb shadow-sm overflow-hidden">
+                <div class="bg-dark text-white p-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="stat-icon bg-white text-dark fs-3 rounded-circle">
+                            <i class="bi bi-mortarboard-fill"></i>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-1 text-white">Request Academic Textbook</h3>
+                            <p class="mb-0 text-white-50 small">Provide educational purpose and verify delivery address</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 p-md-5">
+                    <!-- Book Details Summary -->
+                    <div class="p-3 bg-light rounded-3 mb-4 d-flex align-items-center gap-3 border">
+                        {% if copy.cover_image %}
+                            <img src="{{ copy.cover_image.url }}" alt="" class="rounded" style="width: 50px; height: 65px; object-fit: cover;">
+                        {% else %}
+                            <div class="rounded bg-white p-2 border"><i class="bi bi-journal-bookmark fs-3"></i></div>
+                        {% endif %}
+                        <div>
+                            <h5 class="fw-bold text-dark mb-1">{{ copy.book_title }}</h5>
+                            <div class="small text-muted">{{ copy.author }} &bull; {{ copy.get_academic_level_display }}</div>
+                            <div class="small text-primary fw-semibold mt-1"><i class="bi bi-building"></i> Managing NGO: {{ copy.ngo.name }}</div>
+                        </div>
+                    </div>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                        {% endif %}
+
+                        <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">1. Academic Relevance &amp; Need</h5>
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Educational Purpose &amp; Syllabus Context <span class="text-danger">*</span></label>
+                            {{ form.educational_purpose }}
+                            <div class="form-text">Explain how this specific book helps your current semester, syllabus, or competitive exam preparation.</div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="form-check mt-2">
+                                    {{ form.urgent_need }}
+                                    <label class="form-check-label fw-semibold" for="{{ form.urgent_need.id_for_label }}">Urgent Request (Upcoming exams)</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.urgency_reason }}
+                            </div>
+                        </div>
+
+                        <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">2. Delivery Address</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Physical Address Line <span class="text-danger">*</span></label>
+                                {{ form.delivery_address }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">City <span class="text-danger">*</span></label>
+                                {{ form.delivery_city }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">State <span class="text-danger">*</span></label>
+                                {{ form.delivery_state }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Postal Code <span class="text-danger">*</span></label>
+                                {{ form.delivery_postal_code }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Contact Phone Number <span class="text-danger">*</span></label>
+                                {{ form.contact_phone }}
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-bb-secondary btn-lg py-3">
+                                <i class="bi bi-send-check-fill me-2"></i>Submit Textbook Request to NGO
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

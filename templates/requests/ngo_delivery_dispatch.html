@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Dispatch Delivery — {{ delivery.allocation.inventory_copy.book_title }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <div class="dashboard-sidebar">
+        <div class="mb-4">
+            <h6 class="text-uppercase fw-bold text-muted small">NGO Operations</h6>
+            <div class="fw-bold text-primary">{{ ngo.name }}</div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'dashboard:ngo_dashboard' %}" class="sidebar-nav-item"><i class="bi bi-speedometer2"></i> Overview</a>
+            <a href="{% url 'requests:ngo_deliveries_list' %}" class="sidebar-nav-item active"><i class="bi bi-truck"></i> Deliveries &amp; Dispatch</a>
+        </nav>
+    </div>
+
+    <div class="dashboard-content">
+        <div class="card-bb p-4 p-md-5" style="max-width: 800px;">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div class="stat-icon primary rounded-circle fs-3">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">Dispatch Book Consignment</h3>
+                    <p class="text-muted small mb-0">Assign courier partner and confirm tracking details</p>
+                </div>
+            </div>
+
+            <div class="p-3 bg-light rounded-3 mb-4">
+                <div class="fw-bold text-dark fs-6">{{ delivery.allocation.inventory_copy.book_title }}</div>
+                <div class="small text-muted font-monospace mb-2">Inventory SKU: {{ delivery.allocation.inventory_copy.tracking_code }}</div>
+                <div class="small"><strong>Recipient Student:</strong> {{ delivery.recipient_student.full_name }} (@{{ delivery.recipient_student.username }})</div>
+                <div class="small"><strong>Delivery Address:</strong> {{ delivery.delivery_address }}</div>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Courier / Volunteer Delivery Partner <span class="text-danger">*</span></label>
+                        {{ form.courier_name }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Consignment Tracking Number <span class="text-danger">*</span></label>
+                        {{ form.tracking_number }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Dispatch Notes</label>
+                        {{ form.dispatch_notes }}
+                    </div>
+                    <div class="col-12 mt-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                            <i class="bi bi-truck me-1"></i> Confirm Dispatch &amp; Notify Student
+                        </button>
+                        <a href="{% url 'requests:ngo_deliveries_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BookBridge — Multi-NGO Verified Book Donation Platform{% endblock %}</title>
+    <meta name="description" content="BookBridge connects generous book donors with verified NGOs to provide vetted educational books directly to deserving students.">
+    
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Main Navigation Bar -->
+    <nav class="navbar navbar-expand-lg main-navbar">
+        <div class="container-fluid px-lg-4">
+            <a class="navbar-brand" href="{% url 'core:home' %}">
+                <span class="brand-badge"><i class="bi bi-book-half"></i></span>
+                <span>BookBridge</span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#bbNavbar" aria-controls="bbNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="bbNavbar">
+                <!-- Left Nav Links -->
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.view_name == 'inventory:catalogue' %}active fw-semibold text-primary{% endif %}" href="{% url 'inventory:catalogue' %}">
+                            <i class="bi bi-search me-1"></i> Browse Books
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.view_name == 'ngos:public_directory' %}active fw-semibold text-primary{% endif %}" href="{% url 'ngos:public_directory' %}">
+                            <i class="bi bi-building-check me-1"></i> Verified NGOs
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:how_it_works' %}">
+                            <i class="bi bi-diagram-3 me-1"></i> How It Works
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Right Nav Links -->
+                <ul class="navbar-nav ms-auto align-items-center gap-2">
+                    {% if user.is_authenticated %}
+                        <!-- Notification Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link position-relative text-dark px-2" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Notifications">
+                                <i class="bi bi-bell fs-5"></i>
+                                {% if unread_notifications_count > 0 %}
+                                    <span class="position-absolute top-1 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                                        {{ unread_notifications_count }}
+                                    </span>
+                                {% endif %}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-2" aria-labelledby="notifDropdown" style="width: 320px; max-height: 380px; overflow-y: auto;">
+                                <li class="d-flex justify-content-between align-items-center px-2 py-1 border-bottom">
+                                    <span class="fw-bold small text-uppercase text-muted">Notifications</span>
+                                    {% if unread_notifications_count > 0 %}
+                                        <a href="{% url 'accounts:mark_notifications_read' %}" class="small text-decoration-none text-primary">Mark all read</a>
+                                    {% endif %}
+                                </li>
+                                {% if recent_notifications %}
+                                    {% for notif in recent_notifications %}
+                                        <li>
+                                            <a class="dropdown-item p-2 rounded text-wrap {% if not notif.is_read %}bg-light fw-semibold{% endif %}" href="{% if notif.link_url %}{{ notif.link_url }}{% else %}{% url 'accounts:notifications' %}{% endif %}">
+                                                <div class="small text-dark">{{ notif.title }}</div>
+                                                <div class="small text-muted" style="font-size: 0.78rem;">{{ notif.message|truncatewords:10 }}</div>
+                                                <div class="small text-muted" style="font-size: 0.7rem;">{{ notif.created_at|timesince }} ago</div>
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                {% else %}
+                                    <li class="text-center py-3 text-muted small">No notifications yet.</li>
+                                {% endif %}
+                                <li class="border-top pt-1 mt-1 text-center">
+                                    <a class="small text-decoration-none" href="{% url 'accounts:notifications' %}">View all notifications</a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- Dashboard Direct Shortcut -->
+                        <li class="nav-item">
+                            <a class="btn btn-sm btn-outline-primary fw-semibold px-3" href="{{ user.get_dashboard_url }}">
+                                <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                            </a>
+                        </li>
+
+                        <!-- User Profile Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 text-dark" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-weight: 600; font-size: 0.85rem;">
+                                    {{ user.username|make_list|first|upper }}
+                                </div>
+                                <span class="d-none d-md-inline fw-medium">{{ user.username }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-2" aria-labelledby="userDropdown">
+                                <li class="px-3 py-2 border-bottom">
+                                    <div class="fw-bold">{{ user.full_name }}</div>
+                                    <div class="small text-muted mb-1">{{ user.email }}</div>
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                                        {{ user.get_role_display }}
+                                    </span>
+                                    {% if current_ngo %}
+                                        <div class="small text-primary fw-semibold mt-1">
+                                            <i class="bi bi-shield-check"></i> {{ current_ngo.name }}
+                                        </div>
+                                    {% endif %}
+                                </li>
+                                <li><a class="dropdown-item py-2" href="{{ user.get_dashboard_url }}"><i class="bi bi-grid me-2"></i>My Dashboard</a></li>
+                                <li><a class="dropdown-item py-2" href="{% url 'accounts:profile' %}"><i class="bi bi-person-gear me-2"></i>Account Profile</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form method="post" action="{% url 'accounts:logout' %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item py-2 text-danger">
+                                            <i class="bi bi-box-arrow-right me-2"></i>Sign Out
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+
+                    {% else %}
+                        <!-- Guest Navigation -->
+                        <li class="nav-item">
+                            <a class="nav-link fw-medium text-dark" href="{% url 'accounts:login' %}">
+                                <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <button class="btn btn-bb-primary dropdown-toggle" type="button" id="joinDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                Get Started
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-2" aria-labelledby="joinDropdown">
+                                <li>
+                                    <a class="dropdown-item py-2" href="{% url 'accounts:register_donor' %}">
+                                        <div class="fw-semibold text-primary"><i class="bi bi-gift me-2"></i>I Want to Donate Books</div>
+                                        <small class="text-muted">Give books a second life for students in need</small>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item py-2" href="{% url 'accounts:register_student' %}">
+                                        <div class="fw-semibold text-success"><i class="bi bi-mortarboard me-2"></i>I Am a Student / Learner</div>
+                                        <small class="text-muted">Access free verified academic textbooks</small>
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item py-2" href="{% url 'ngos:register_ngo' %}">
+                                        <div class="fw-semibold text-dark"><i class="bi bi-building-add me-2"></i>Register an NGO</div>
+                                        <small class="text-muted">Join as a verified distribution partner</small>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages (Alerts) -->
+    <div class="container-fluid px-lg-4 mt-3">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow-sm d-flex align-items-center" role="alert">
+                    <i class="bi {% if message.tags == 'success' %}bi-check-circle-fill{% elif message.tags == 'danger' %}bi-exclamation-octagon-fill{% elif message.tags == 'warning' %}bi-exclamation-triangle-fill{% else %}bi-info-circle-fill{% endif %} me-2 fs-5"></i>
+                    <div>{{ message }}</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Main Page Content Block -->
+    <main class="flex-grow-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Professional Platform Footer -->
+    <footer>
+        <div class="container">
+            <div class="row g-4 mb-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <span class="brand-badge"><i class="bi bi-book-half"></i></span>
+                        <span class="fs-4 fw-bold text-dark">BookBridge</span>
+                    </div>
+                    <p class="text-muted small">
+                        A transparent, multi-NGO verified book donation platform uniting kind donors, reputable non-profits, and eager students. Ensuring every donated educational book is physically inspected, catalogued, and delivered to learners who genuinely need it.
+                    </p>
+                    <div class="d-flex gap-3 text-muted">
+                        <span class="badge bg-light text-dark border"><i class="bi bi-shield-check text-success"></i> 100% Verified NGOs</span>
+                        <span class="badge bg-light text-dark border"><i class="bi bi-box-seam text-primary"></i> Tracked Delivery</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="text-uppercase fw-bold text-dark mb-3">Platform</h6>
+                    <ul class="list-unstyled small d-flex flex-direction-column flex-column gap-2">
+                        <li><a href="{% url 'inventory:catalogue' %}" class="text-muted text-decoration-none">Search Books</a></li>
+                        <li><a href="{% url 'ngos:public_directory' %}" class="text-muted text-decoration-none">NGO Directory</a></li>
+                        <li><a href="{% url 'core:how_it_works' %}" class="text-muted text-decoration-none">Verification Process</a></li>
+                        <li><a href="{% url 'core:about' %}" class="text-muted text-decoration-none">About Us</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="text-uppercase fw-bold text-dark mb-3">User Portals</h6>
+                    <ul class="list-unstyled small d-flex flex-column gap-2">
+                        <li><a href="{% url 'accounts:register_donor' %}" class="text-muted text-decoration-none">Donor Registration & Pickup</a></li>
+                        <li><a href="{% url 'accounts:register_student' %}" class="text-muted text-decoration-none">Student Verification Portal</a></li>
+                        <li><a href="{% url 'ngos:register_ngo' %}" class="text-muted text-decoration-none">NGO Partnership Onboarding</a></li>
+                        <li><a href="{% url 'accounts:login' %}" class="text-muted text-decoration-none">Platform Login</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="text-uppercase fw-bold text-dark mb-3">Accountability</h6>
+                    <p class="text-muted small mb-2">
+                        Every allocation is audited, transactional, and bound to genuine educational relevance.
+                    </p>
+                    <div class="p-3 bg-light rounded-3 border small">
+                        <div class="fw-semibold text-dark mb-1"><i class="bi bi-lock-fill text-primary"></i> Data Isolation Guaranteed</div>
+                        <span class="text-muted" style="font-size: 0.76rem;">NGO records are strictly separated with organization-level access boundaries.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-top pt-3 d-flex flex-wrap justify-content-between align-items-center small text-muted">
+                <div>&copy; 2026 BookBridge Platform. All rights reserved.</div>
+                <div>Educational Access Initiative &middot; Built with Django &amp; PostgreSQL</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5.3 Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <!-- Custom Scripts -->
+    <script src="/static/js/app.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

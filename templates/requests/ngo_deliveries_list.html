@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block title %}Deliveries &amp; Logistics — {{ ngo.name }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <div class="dashboard-sidebar">
+        <div class="mb-4">
+            <h6 class="text-uppercase fw-bold text-muted small">NGO Operations</h6>
+            <div class="fw-bold text-primary">{{ ngo.name }}</div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'dashboard:ngo_dashboard' %}" class="sidebar-nav-item"><i class="bi bi-speedometer2"></i> Overview</a>
+            <a href="{% url 'donations:ngo_donations_list' %}" class="sidebar-nav-item"><i class="bi bi-gift"></i> Donations Queue</a>
+            <a href="{% url 'inventory:ngo_inventory_list' %}" class="sidebar-nav-item"><i class="bi bi-bookshelf"></i> Warehouse Inventory</a>
+            <a href="{% url 'requests:ngo_students_verification_queue' %}" class="sidebar-nav-item"><i class="bi bi-person-vcard"></i> Student Verifications</a>
+            <a href="{% url 'requests:ngo_requests_queue' %}" class="sidebar-nav-item"><i class="bi bi-mortarboard"></i> Book Requests</a>
+            <a href="{% url 'requests:ngo_deliveries_list' %}" class="sidebar-nav-item active"><i class="bi bi-truck"></i> Deliveries &amp; Dispatch</a>
+            <a href="{% url 'ngos:service_areas' %}" class="sidebar-nav-item"><i class="bi bi-geo-alt"></i> Service Areas</a>
+            <a href="{% url 'ngos:staff_list' %}" class="sidebar-nav-item"><i class="bi bi-people"></i> Staff Management</a>
+        </nav>
+    </div>
+
+    <div class="dashboard-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-1">Student Deliveries &amp; Shipment Tracking</h3>
+                <p class="text-muted small mb-0">Track consignment parcels, courier dispatch, and student receipt verification</p>
+            </div>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="card-bb p-3 mb-4">
+            <form method="get" class="row g-2">
+                <div class="col-md-7">
+                    <input type="text" name="q" class="form-control" placeholder="Search tracking number, recipient student, courier partner..." value="{{ search_query }}">
+                </div>
+                <div class="col-md-3">
+                    <select name="status" class="form-select">
+                        <option value="">All Delivery States</option>
+                        {% for val, label in DeliveryStatus.choices %}
+                            <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-outline-primary">Filter</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Deliveries Table -->
+        <div class="card-bb overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Tracking Number</th>
+                            <th>Book Title</th>
+                            <th>Recipient Student</th>
+                            <th>Courier Partner</th>
+                            <th>Status</th>
+                            <th>Student Receipt</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for delivery in page_obj %}
+                            <tr>
+                                <td>
+                                    <span class="badge bg-dark font-monospace">{{ delivery.tracking_number }}</span>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-dark">{{ delivery.allocation.inventory_copy.book_title }}</div>
+                                    <div class="small text-muted font-monospace">SKU: {{ delivery.allocation.inventory_copy.tracking_code }}</div>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">{{ delivery.recipient_student.full_name }}</div>
+                                    <div class="small text-muted">{{ delivery.delivery_address|truncatechars:35 }}</div>
+                                </td>
+                                <td>
+                                    <span class="small fw-semibold">{{ delivery.courier_name }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-{{ delivery.status|lower }}">{{ delivery.get_status_display }}</span>
+                                </td>
+                                <td>
+                                    {% if delivery.student_confirmed %}
+                                        <span class="badge badge-approved"><i class="bi bi-check-circle-fill"></i> Confirmed Received</span>
+                                    {% else %}
+                                        <span class="badge bg-light text-muted border">Pending Receipt</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if delivery.status == 'PREPARING' %}
+                                        <a href="{% url 'requests:ngo_delivery_dispatch' delivery.id %}" class="btn btn-sm btn-primary">
+                                            <i class="bi bi-box-seam me-1"></i> Dispatch
+                                        </a>
+                                    {% else %}
+                                        <div class="dropdown d-inline">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                Update Status
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-2">
+                                                <li>
+                                                    <form method="post" action="{% url 'requests:ngo_delivery_status_update' delivery.id %}">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="status" value="OUT_FOR_DELIVERY">
+                                                        <button type="submit" class="dropdown-item py-1">Mark Out for Delivery</button>
+                                                    </form>
+                                                </li>
+                                                <li>
+                                                    <form method="post" action="{% url 'requests:ngo_delivery_status_update' delivery.id %}">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="status" value="DELIVERED">
+                                                        <button type="submit" class="dropdown-item py-1 text-success">Mark Delivered</button>
+                                                    </form>
+                                                </li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <form method="post" action="{% url 'requests:ngo_delivery_status_update' delivery.id %}">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="status" value="FAILED">
+                                                        <button type="submit" class="dropdown-item py-1 text-danger">Mark Delivery Failed</button>
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="bi bi-truck display-5"></i>
+                                    <p class="mt-2">No delivery jobs found in this queue.</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&status={{ status_filter }}&q={{ search_query }}">Previous</a></li>
+                    {% endif %}
+                    <li class="page-item active"><span class="page-link">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+                    {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&status={{ status_filter }}&q={{ search_query }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

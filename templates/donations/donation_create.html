@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}Donate Educational Books — BookBridge{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card-bb shadow-sm overflow-hidden">
+                <div class="bg-primary text-white p-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="stat-icon bg-white text-primary fs-3 rounded-circle">
+                            <i class="bi bi-gift-fill"></i>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-1 text-white">List Book for Verified Donation</h3>
+                            <p class="mb-0 text-white-50 small">Provide book details and photos. An authorized partner NGO will inspect and pick it up.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 p-md-5">
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                        {% endif %}
+
+                        <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">1. Select Recipient NGO Partner</h5>
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Partner NGO Organization <span class="text-danger">*</span></label>
+                            {{ form.ngo }}
+                            <div class="form-text">Choose a verified NGO operating in your region that manages student textbook distribution.</div>
+                        </div>
+
+                        <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">2. Book Specifications</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-8">
+                                <label class="form-label fw-semibold">Book Title <span class="text-danger">*</span></label>
+                                {{ form.title }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Author / Editor <span class="text-danger">*</span></label>
+                                {{ form.author }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">ISBN (Optional)</label>
+                                {{ form.isbn }}
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label fw-semibold">Publisher</label>
+                                {{ form.publisher }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Publication Year</label>
+                                {{ form.publication_year }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Academic Category <span class="text-danger">*</span></label>
+                                {{ form.category }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Academic Grade / Level <span class="text-danger">*</span></label>
+                                {{ form.academic_level }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Subject / Field of Study</label>
+                                {{ form.subject }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Edition (Optional)</label>
+                                {{ form.edition }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Condition Rating <span class="text-danger">*</span></label>
+                                {{ form.declared_condition }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Condition Description &amp; Notes <span class="text-danger">*</span></label>
+                                {{ form.donor_condition_description }}
+                            </div>
+                        </div>
+
+                        <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">3. Book Photos (Multiple Uploads Supported)</h5>
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Upload Book Photos (Cover, Spine, Sample Page) <span class="text-danger">*</span></label>
+                            <input type="file" name="images" id="id_donation_images" class="form-control" multiple accept="image/*" required>
+                            <div class="form-text">Select one or multiple clear photos of the book to help NGO staff evaluate its condition.</div>
+                            <!-- Live interactive preview container -->
+                            <div id="image-preview-container" class="image-thumbnail-grid mt-2"></div>
+                        </div>
+
+                        <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">4. Physical Pickup Location</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Pickup Address <span class="text-danger">*</span></label>
+                                {{ form.pickup_address }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">City <span class="text-danger">*</span></label>
+                                {{ form.pickup_city }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">State <span class="text-danger">*</span></label>
+                                {{ form.pickup_state }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">PIN / Postal Code <span class="text-danger">*</span></label>
+                                {{ form.pickup_postal_code }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Contact Phone <span class="text-danger">*</span></label>
+                                {{ form.donor_contact_phone }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Preferred Pickup Timing</label>
+                                {{ form.preferred_pickup_time }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Special Notes for Agent</label>
+                                {{ form.donor_notes }}
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-bb-primary btn-lg">
+                                <i class="bi bi-cloud-arrow-up-fill me-2"></i>Submit Donation for NGO Review
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

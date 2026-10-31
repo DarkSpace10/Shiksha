@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Verified Textbooks — BookBridge{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 fw-semibold">Student Textbook Search</span>
+        <h1 class="display-6 fw-bold mt-2">Verified Academic Book Catalogue</h1>
+        <p class="text-muted lead mx-auto" style="max-width: 680px;">
+            Every textbook here has been donated by generous patrons, picked up, and physically inspected by verified partner NGOs. Free for students in genuine need.
+        </p>
+    </div>
+
+    <!-- Filter & Search Toolbar -->
+    <div class="card-bb p-4 mb-4">
+        <form method="get" class="row g-3">
+            <div class="col-md-5">
+                <label class="form-label small fw-semibold">Keywords Search</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="q" class="form-control" placeholder="Search by title, author, subject, or ISBN..." value="{{ search_query }}">
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold">Academic Category</label>
+                <select name="category" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for val, label in categories %}
+                        <option value="{{ val }}" {% if category_filter == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold">Academic Level</label>
+                <select name="level" class="form-select">
+                    <option value="">All Levels</option>
+                    {% for val, label in academic_levels %}
+                        <option value="{{ val }}" {% if level_filter == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold">Condition</label>
+                <select name="condition" class="form-select">
+                    <option value="">Any Condition</option>
+                    {% for val, label in condition_grades %}
+                        <option value="{{ val }}" {% if condition_filter == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label small fw-semibold">Partner NGO Facility</label>
+                <select name="ngo" class="form-select">
+                    <option value="">All Partner NGOs</option>
+                    {% for ngo in active_ngos %}
+                        <option value="{{ ngo.id }}" {% if ngo_filter == ngo.id|stringformat:"s" %}selected{% endif %}>{{ ngo.name }} ({{ ngo.city }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-4 d-flex align-items-end">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="all" value="1" id="showAllCheck" {% if show_all %}checked{% endif %}>
+                    <label class="form-check-label small fw-semibold" for="showAllCheck">
+                        Include Allocated / Reserved Books
+                    </label>
+                </div>
+            </div>
+
+            <div class="col-md-4 d-flex align-items-end justify-content-end gap-2">
+                <a href="{% url 'inventory:catalogue' %}" class="btn btn-outline-secondary">Reset</a>
+                <button type="submit" class="btn btn-bb-primary px-4"><i class="bi bi-funnel-fill me-1"></i> Apply Filters</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Book Grid -->
+    {% if page_obj %}
+        <div class="row g-4">
+            {% for copy in page_obj %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card-bb card-bb-interactive h-100 d-flex flex-column overflow-hidden">
+                        <div class="book-cover-container">
+                            {% if copy.cover_image %}
+                                <img src="{{ copy.cover_image.url }}" alt="{{ copy.book_title }}">
+                            {% else %}
+                                <div class="book-cover-placeholder">
+                                    <i class="bi bi-journal-bookmark display-4"></i>
+                                    <div class="small mt-2">{{ copy.get_category_display }}</div>
+                                </div>
+                            {% endif %}
+                            <span class="position-absolute top-0 start-0 m-2 badge bg-dark bg-opacity-75">
+                                {{ copy.tracking_code }}
+                            </span>
+                            <span class="position-absolute top-0 end-0 m-2 badge badge-{{ copy.status|lower }}">
+                                {{ copy.get_status_display }}
+                            </span>
+                        </div>
+
+                        <div class="p-3 d-flex flex-column flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="badge bg-light text-dark border small">{{ copy.get_academic_level_display }}</span>
+                                <span class="badge bg-secondary-subtle text-secondary small">{{ copy.get_condition_grade_display }}</span>
+                            </div>
+                            <h5 class="fw-bold text-dark mt-2 mb-1 text-truncate" title="{{ copy.book_title }}">{{ copy.book_title }}</h5>
+                            <p class="text-muted small mb-2">By {{ copy.author }}</p>
+
+                            {% if copy.subject %}
+                                <div class="small text-muted mb-2"><strong>Subject:</strong> {{ copy.subject }}</div>
+                            {% endif %}
+
+                            <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
+                                <div class="small text-muted text-truncate me-2" style="max-width: 150px;">
+                                    <i class="bi bi-building"></i> {{ copy.ngo.name }}
+                                </div>
+                                <a href="{% url 'inventory:book_detail' copy.id %}" class="btn btn-sm btn-bb-primary">
+                                    View &amp; Request <i class="bi bi-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+            <nav class="mt-5">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&category={{ category_filter }}&level={{ level_filter }}&condition={{ condition_filter }}&ngo={{ ngo_filter }}&all={{ show_all|yesno:'1,0' }}">Previous</a></li>
+                    {% endif %}
+                    <li class="page-item active"><span class="page-link">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+                    {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&category={{ category_filter }}&level={{ level_filter }}&condition={{ condition_filter }}&ngo={{ ngo_filter }}&all={{ show_all|yesno:'1,0' }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="text-center py-5 card-bb p-5">
+            <i class="bi bi-journal-x display-3 text-muted"></i>
+            <h4 class="mt-3">No matching books found</h4>
+            <p class="text-muted">Try adjusting your search keywords or removing some filters.</p>
+            <a href="{% url 'inventory:catalogue' %}" class="btn btn-outline-primary mt-2">Clear All Filters</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

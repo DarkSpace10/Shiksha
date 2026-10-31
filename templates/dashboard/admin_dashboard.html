@@ -1,0 +1,377 @@
+{% extends 'base.html' %}
+
+{% block title %}Platform Administration — BookBridge{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-5">
+    <!-- Admin Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <span class="badge bg-danger px-3 py-1 mb-1">Platform Administrator</span>
+            <h2 class="fw-bold mb-0 text-dark">BookBridge System Administration</h2>
+            <p class="text-muted small mb-0">Multi-NGO oversight, application approvals, user governance &amp; audit trail</p>
+        </div>
+        <div class="d-flex gap-2">
+            <span class="badge bg-light text-dark border p-2">
+                <i class="bi bi-server me-1"></i> PostgreSQL Architecture &bull; Multi-Tenant Isolated
+            </span>
+        </div>
+    </div>
+
+    <!-- Aggregated Platform Metrics Ribbon -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Partner NGOs</span>
+                        <h3 class="fw-bold text-dark mb-0">{{ metrics.approved_ngos }} <small class="text-muted fs-6">/ {{ metrics.total_ngos }}</small></h3>
+                    </div>
+                    <div class="stat-icon primary"><i class="bi bi-buildings"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Pending Applications</span>
+                        <h3 class="fw-bold text-danger mb-0">{{ metrics.pending_ngos }}</h3>
+                    </div>
+                    <div class="stat-icon danger"><i class="bi bi-hourglass-split"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Registered Donors</span>
+                        <h3 class="fw-bold text-info mb-0">{{ metrics.total_donors }}</h3>
+                    </div>
+                    <div class="stat-icon secondary"><i class="bi bi-gift"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Verified Students</span>
+                        <h3 class="fw-bold text-success mb-0">{{ metrics.total_students }}</h3>
+                    </div>
+                    <div class="stat-icon success"><i class="bi bi-mortarboard"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link {% if tab == 'overview' %}active fw-bold text-primary{% else %}text-muted{% endif %}" href="?tab=overview">
+                <i class="bi bi-speedometer2 me-1"></i> Overview
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if tab == 'ngos' %}active fw-bold text-primary{% else %}text-muted{% endif %}" href="?tab=ngos">
+                <i class="bi bi-building-check me-1"></i> NGO Applications &amp; Organizations
+                {% if metrics.pending_ngos > 0 %}
+                    <span class="badge bg-danger ms-1">{{ metrics.pending_ngos }}</span>
+                {% endif %}
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if tab == 'users' %}active fw-bold text-primary{% else %}text-muted{% endif %}" href="?tab=users">
+                <i class="bi bi-people me-1"></i> User Accounts
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if tab == 'audit' %}active fw-bold text-primary{% else %}text-muted{% endif %}" href="?tab=audit">
+                <i class="bi bi-journal-text me-1"></i> Audit Trail
+            </a>
+        </li>
+    </ul>
+
+    <!-- TAB 1: OVERVIEW -->
+    {% if tab == 'overview' %}
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card-bb p-4 h-100">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-bell-fill text-warning me-2"></i>Pending NGO Approval Requests</h5>
+                    {% if pending_ngos %}
+                        <div class="list-group list-group-flush">
+                            {% for p_ngo in pending_ngos %}
+                                <div class="list-group-item px-0 py-3 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="fw-bold text-dark">{{ p_ngo.name }}</div>
+                                        <div class="small text-muted">Reg No: {{ p_ngo.registration_number }} &bull; {{ p_ngo.city }}, {{ p_ngo.state }}</div>
+                                        <div class="small text-muted" style="font-size: 0.72rem;">Applied on {{ p_ngo.created_at|date:"M d, Y" }}</div>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <form method="post" action="{% url 'dashboard:admin_ngo_decision' p_ngo.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="APPROVE">
+                                            <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                                        </form>
+                                        <form method="post" action="{% url 'dashboard:admin_ngo_decision' p_ngo.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="REJECT">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Reject</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted small py-4 text-center">All partner NGO applications have been processed.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card-bb p-4 h-100">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-bar-chart-fill text-primary me-2"></i>Platform Distribution Impact</h5>
+                    <div class="row g-3 text-center">
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded-3">
+                                <div class="display-6 fw-bold text-primary">{{ metrics.total_donations }}</div>
+                                <div class="small text-muted fw-semibold">Total Books Donated</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded-3">
+                                <div class="display-6 fw-bold text-success">{{ metrics.total_delivered }}</div>
+                                <div class="small text-muted fw-semibold">Textbooks Reached Students</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded-3">
+                                <div class="display-6 fw-bold text-warning">{{ metrics.total_inventory }}</div>
+                                <div class="small text-muted fw-semibold">Active Inventory Copies</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded-3">
+                                <div class="display-6 fw-bold text-info">{{ metrics.total_students }}</div>
+                                <div class="small text-muted fw-semibold">Registered Learners</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <!-- TAB 2: NGO APPROVALS & ORGANIZATIONS -->
+    {% elif tab == 'ngos' %}
+        <div class="card-bb overflow-hidden">
+            <div class="p-3 bg-light border-bottom">
+                <h5 class="fw-bold mb-0">Registered Partner Organizations</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Organization Name</th>
+                            <th>Registration No.</th>
+                            <th>Headquarters</th>
+                            <th>Contact Email</th>
+                            <th>Status</th>
+                            <th>Submitted</th>
+                            <th class="text-end">Administrative Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for n in all_ngos %}
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-dark">{{ n.name }}</div>
+                                    <a href="{% url 'ngos:ngo_detail' n.slug %}" target="_blank" class="small text-primary text-decoration-none">View Profile</a>
+                                </td>
+                                <td><span class="badge bg-light text-dark border">{{ n.registration_number }}</span></td>
+                                <td class="small">{{ n.city }}, {{ n.state }}</td>
+                                <td class="small">{{ n.email }}</td>
+                                <td>
+                                    <span class="badge badge-{{ n.status|lower }}">{{ n.get_status_display }}</span>
+                                </td>
+                                <td class="small text-muted">{{ n.created_at|date:"M d, Y" }}</td>
+                                <td class="text-end">
+                                    {% if n.status == 'PENDING' %}
+                                        <form method="post" action="{% url 'dashboard:admin_ngo_decision' n.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="APPROVE">
+                                            <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                                        </form>
+                                        <form method="post" action="{% url 'dashboard:admin_ngo_decision' n.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="REJECT">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Reject</button>
+                                        </form>
+                                    {% elif n.status == 'APPROVED' %}
+                                        <form method="post" action="{% url 'dashboard:admin_ngo_decision' n.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="SUSPEND">
+                                            <button type="submit" class="btn btn-sm btn-outline-warning" data-confirm="Suspend this NGO organization?">Suspend</button>
+                                        </form>
+                                    {% elif n.status == 'SUSPENDED' %}
+                                        <form method="post" action="{% url 'dashboard:admin_ngo_decision' n.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="REACTIVATE">
+                                            <button type="submit" class="btn btn-sm btn-outline-success">Reactivate</button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    <!-- TAB 3: USER ACCOUNTS -->
+    {% elif tab == 'users' %}
+        <div class="card-bb p-3 mb-4">
+            <form method="get" class="row g-2">
+                <input type="hidden" name="tab" value="users">
+                <div class="col-md-7">
+                    <input type="text" name="u_search" class="form-control" placeholder="Search user by username, email, full name..." value="{{ user_search }}">
+                </div>
+                <div class="col-md-3">
+                    <select name="role" class="form-select">
+                        <option value="">All Security Roles</option>
+                        {% for val, label in UserRole.choices %}
+                            <option value="{{ val }}" {% if role_filter == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-outline-primary">Filter Users</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-bb overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>User</th>
+                            <th>Role</th>
+                            <th>Contact Phone</th>
+                            <th>Account Status</th>
+                            <th>Joined</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users_page %}
+                            <tr>
+                                <td>
+                                    <div class="fw-bold">{{ u.full_name }}</div>
+                                    <div class="small text-muted">@{{ u.username }} &bull; {{ u.email }}</div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary-subtle text-secondary border">{{ u.get_role_display }}</span>
+                                </td>
+                                <td class="small">{{ u.phone_number|default:"N/A" }}</td>
+                                <td>
+                                    {% if u.is_suspended %}
+                                        <span class="badge bg-danger">Suspended</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% endif %}
+                                </td>
+                                <td class="small text-muted">{{ u.created_at|date:"M d, Y" }}</td>
+                                <td class="text-end">
+                                    {% if u != request.user %}
+                                        <a href="{% url 'dashboard:admin_toggle_user_suspension' u.id %}" class="btn btn-sm {% if u.is_suspended %}btn-outline-success{% else %}btn-outline-danger{% endif %}" data-confirm="Toggle suspension state for this user?">
+                                            {% if u.is_suspended %}Activate{% else %}Suspend{% endif %}
+                                        </a>
+                                    {% else %}
+                                        <span class="badge bg-light text-muted border">Superadmin</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if users_page.has_other_pages %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if users_page.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?tab=users&u_page={{ users_page.previous_page_number }}&role={{ role_filter }}&u_search={{ user_search }}">Previous</a></li>
+                    {% endif %}
+                    <li class="page-item active"><span class="page-link">{{ users_page.number }} of {{ users_page.paginator.num_pages }}</span></li>
+                    {% if users_page.has_next %}
+                        <li class="page-item"><a class="page-link" href="?tab=users&u_page={{ users_page.next_page_number }}&role={{ role_filter }}&u_search={{ user_search }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+
+    <!-- TAB 4: AUDIT TRAIL -->
+    {% elif tab == 'audit' %}
+        <div class="card-bb p-3 mb-4">
+            <form method="get" class="row g-2">
+                <input type="hidden" name="tab" value="audit">
+                <div class="col-md-9">
+                    <input type="text" name="a_search" class="form-control" placeholder="Search audit logs by action, username, entity, or organization..." value="{{ audit_search }}">
+                </div>
+                <div class="col-md-3 d-grid">
+                    <button type="submit" class="btn btn-outline-primary">Search Logs</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-bb overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 font-monospace" style="font-size: 0.85rem;">
+                    <thead class="table-light font-sans-serif">
+                        <tr>
+                            <th>Timestamp (UTC)</th>
+                            <th>Actor User</th>
+                            <th>Action Type</th>
+                            <th>Entity Type &amp; ID</th>
+                            <th>Organization Boundary</th>
+                            <th>Client IP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in audit_page %}
+                            <tr>
+                                <td>{{ entry.timestamp|date:"Y-m-d H:i:s" }}</td>
+                                <td>{{ entry.user.username|default:"System" }}</td>
+                                <td><span class="badge bg-dark">{{ entry.action }}</span></td>
+                                <td>{{ entry.entity_type }} ({{ entry.entity_id|truncatechars:10 }})</td>
+                                <td>{{ entry.organization.name|default:"Global Platform" }}</td>
+                                <td>{{ entry.ip_address|default:"127.0.0.1" }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">No audit logs matching search.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if audit_page.has_other_pages %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if audit_page.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?tab=audit&a_page={{ audit_page.previous_page_number }}&a_search={{ audit_search }}">Previous</a></li>
+                    {% endif %}
+                    <li class="page-item active"><span class="page-link">{{ audit_page.number }} of {{ audit_page.paginator.num_pages }}</span></li>
+                    {% if audit_page.has_next %}
+                        <li class="page-item"><a class="page-link" href="?tab=audit&a_page={{ audit_page.next_page_number }}&a_search={{ audit_search }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

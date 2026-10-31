@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+
+{% block title %}BookBridge — Multi-NGO Verified Book Donation Platform{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-gradient text-center">
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill fw-semibold mb-3">
+                    <i class="bi bi-patch-check-fill me-1"></i> Multi-NGO Verified &amp; Physically Inspected
+                </span>
+                <h1 class="display-4 fw-extrabold mb-3 text-dark">
+                    Empowering Deserving Students With <span class="text-primary">Verified Textbooks</span>
+                </h1>
+                <p class="lead text-muted mb-4 px-lg-5">
+                    BookBridge unites compassionate donors and vetted non-profit organizations to collect, physically inspect, and deliver essential educational books directly to verified students in genuine financial need.
+                </p>
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a href="{% url 'accounts:register_donor' %}" class="btn btn-bb-primary btn-lg px-4 shadow-sm">
+                        <i class="bi bi-gift me-2"></i>Donate Books Now
+                    </a>
+                    <a href="{% url 'inventory:catalogue' %}" class="btn btn-outline-dark btn-lg px-4">
+                        <i class="bi bi-search me-2"></i>Browse Book Catalogue
+                    </a>
+                    <a href="{% url 'accounts:register_student' %}" class="btn btn-bb-secondary btn-lg px-4">
+                        <i class="bi bi-mortarboard me-2"></i>Student Access
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Impact Metrics Ribbon -->
+<section class="py-4 bg-white border-bottom shadow-sm">
+    <div class="container">
+        <div class="row g-4 text-center">
+            <div class="col-6 col-md-3">
+                <div class="p-3">
+                    <div class="display-6 fw-bold text-primary">{{ stats.total_books_donated|default:"0" }}+</div>
+                    <div class="text-muted small fw-semibold text-uppercase">Books Donated</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3">
+                    <div class="display-6 fw-bold text-success">{{ stats.active_partner_ngos|default:"0" }}</div>
+                    <div class="text-muted small fw-semibold text-uppercase">Verified Partner NGOs</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3">
+                    <div class="display-6 fw-bold text-warning">{{ stats.students_supported|default:"0" }}+</div>
+                    <div class="text-muted small fw-semibold text-uppercase">Students Empowered</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3">
+                    <div class="display-6 fw-bold text-info">{{ stats.available_in_inventory|default:"0" }}</div>
+                    <div class="text-muted small fw-semibold text-uppercase">Ready in Inventory</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How BookBridge Works - 4 Pillars -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="badge bg-light text-primary border px-3 py-1 fw-semibold">Vetted Workflow</span>
+            <h2 class="mt-2 fw-bold">The Verified Donation-to-Delivery Pipeline</h2>
+            <p class="text-muted">A closed-loop system ensuring educational integrity and transparent logistics</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card-bb h-100 p-4 text-center">
+                    <div class="stat-icon primary mx-auto mb-3">
+                        <i class="bi bi-camera"></i>
+                    </div>
+                    <h5 class="fw-bold">1. Donor Listing &amp; Photos</h5>
+                    <p class="text-muted small">
+                        Donors list syllabus books with multiple photos, condition details, and choose an authorized local NGO.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="card-bb h-100 p-4 text-center">
+                    <div class="stat-icon secondary mx-auto mb-3">
+                        <i class="bi bi-truck"></i>
+                    </div>
+                    <h5 class="fw-bold">2. NGO Pickup &amp; QA</h5>
+                    <p class="text-muted small">
+                        NGO staff review the donation, assign collection agents, and physically inspect pages and binding before cataloguing.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="card-bb h-100 p-4 text-center">
+                    <div class="stat-icon warning mx-auto mb-3">
+                        <i class="bi bi-person-vcard"></i>
+                    </div>
+                    <h5 class="fw-bold">3. Student Verification</h5>
+                    <p class="text-muted small">
+                        Students upload college/school ID &amp; syllabus requirements. NGO staff verify academic need before approval.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="card-bb h-100 p-4 text-center">
+                    <div class="stat-icon success mx-auto mb-3">
+                        <i class="bi bi-box2-heart"></i>
+                    </div>
+                    <h5 class="fw-bold">4. Tracked Delivery</h5>
+                    <p class="text-muted small">
+                        Books are allocated via atomic concurrency locking, dispatched with tracking numbers, and receipt is confirmed.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{% url 'core:how_it_works' %}" class="btn btn-link text-decoration-none fw-semibold">
+                Explore Detailed 10-Step Workflow <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Available Books Showcase -->
+{% if featured_books %}
+<section class="py-5 bg-white border-top border-bottom">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 fw-semibold">Recently Catalogued</span>
+                <h2 class="mt-2 fw-bold mb-0">Verified Books Available For Students</h2>
+            </div>
+            <a href="{% url 'inventory:catalogue' %}" class="btn btn-outline-primary fw-semibold">
+                View All Books <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="row g-4">
+            {% for copy in featured_books %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card-bb card-bb-interactive h-100 overflow-hidden d-flex flex-column">
+                        <div class="book-cover-container">
+                            {% if copy.cover_image %}
+                                <img src="{{ copy.cover_image.url }}" alt="{{ copy.book_title }}">
+                            {% else %}
+                                <div class="book-cover-placeholder">
+                                    <i class="bi bi-journal-bookmark display-4"></i>
+                                    <div class="small mt-2">{{ copy.get_category_display }}</div>
+                                </div>
+                            {% endif %}
+                            <span class="position-absolute top-0 start-0 m-2 badge bg-dark bg-opacity-75">
+                                {{ copy.tracking_code }}
+                            </span>
+                            <span class="position-absolute top-0 end-0 m-2 badge badge-available">
+                                <i class="bi bi-check-circle-fill"></i> Available
+                            </span>
+                        </div>
+
+                        <div class="p-3 d-flex flex-column flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="badge bg-light text-dark border small">{{ copy.get_academic_level_display }}</span>
+                                <span class="badge bg-secondary-subtle text-secondary small">{{ copy.get_condition_grade_display }}</span>
+                            </div>
+                            <h5 class="fw-bold text-dark mt-2 mb-1 text-truncate" title="{{ copy.book_title }}">{{ copy.book_title }}</h5>
+                            <p class="text-muted small mb-2">By {{ copy.author }}</p>
+
+                            <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
+                                <div class="small text-muted text-truncate me-2" style="max-width: 160px;">
+                                    <i class="bi bi-building"></i> {{ copy.ngo.name }}
+                                </div>
+                                <a href="{% url 'inventory:book_detail' copy.id %}" class="btn btn-sm btn-bb-primary">
+                                    Details <i class="bi bi-chevron-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Partner NGOs Directory Highlight -->
+{% if verified_ngos %}
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <span class="badge bg-light text-dark border px-3 py-1 fw-semibold">Local Distribution</span>
+                <h2 class="mt-2 fw-bold mb-0">Verified Non-Profit Partners</h2>
+            </div>
+            <a href="{% url 'ngos:public_directory' %}" class="btn btn-outline-secondary fw-semibold">
+                Explore All NGOs <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="row g-4">
+            {% for ngo in verified_ngos %}
+                <div class="col-md-6 col-lg-3">
+                    <div class="card-bb h-100 p-3 text-center d-flex flex-column">
+                        <div class="d-flex align-items-center justify-content-center rounded-3 bg-light mx-auto mb-3 border" style="width: 64px; height: 64px;">
+                            {% if ngo.logo %}
+                                <img src="{{ ngo.logo.url }}" alt="{{ ngo.name }}" style="max-width: 50px; max-height: 50px; object-fit: contain;">
+                            {% else %}
+                                <i class="bi bi-building text-primary fs-2"></i>
+                            {% endif %}
+                        </div>
+                        <h6 class="fw-bold mb-1">{{ ngo.name }}</h6>
+                        <p class="text-muted small mb-2"><i class="bi bi-geo-alt"></i> {{ ngo.city }}, {{ ngo.state }}</p>
+                        <p class="text-muted small text-truncate-2 flex-grow-1" style="font-size: 0.8rem;">
+                            {{ ngo.description|truncatewords:15 }}
+                        </p>
+                        <a href="{% url 'ngos:ngo_detail' ngo.slug %}" class="btn btn-sm btn-outline-primary mt-2">
+                            View Profile
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Call to Action Banner -->
+<section class="py-5 bg-dark text-white text-center">
+    <div class="container py-3">
+        <h2 class="fw-bold text-white mb-3">Join the Educational Book Distribution Revolution</h2>
+        <p class="lead text-light opacity-75 mb-4 mx-auto" style="max-width: 700px;">
+            Whether you have textbooks on your shelf or need verified books for your upcoming semester, BookBridge provides a trusted bridge for genuine learning.
+        </p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{% url 'accounts:register_donor' %}" class="btn btn-bb-primary btn-lg">
+                <i class="bi bi-gift me-2"></i>Donate as a Donor
+            </a>
+            <a href="{% url 'accounts:register_student' %}" class="btn btn-bb-secondary btn-lg">
+                <i class="bi bi-mortarboard me-2"></i>Apply as a Student
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+
+{% block title %}NGO Operations Dashboard — {{ ngo.name }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <!-- NGO Sidebar Navigation -->
+    <div class="dashboard-sidebar">
+        <div class="mb-4">
+            <h6 class="text-uppercase fw-bold text-muted small">NGO Operations</h6>
+            <div class="fw-bold text-primary">{{ ngo.name }}</div>
+            <span class="badge bg-success-subtle text-success border border-success-subtle small mt-1">Verified Partner</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'dashboard:ngo_dashboard' %}" class="sidebar-nav-item active"><i class="bi bi-speedometer2"></i> Overview</a>
+            <a href="{% url 'donations:ngo_donations_list' %}" class="sidebar-nav-item"><i class="bi bi-gift"></i> Donations Queue</a>
+            <a href="{% url 'inventory:ngo_inventory_list' %}" class="sidebar-nav-item"><i class="bi bi-bookshelf"></i> Warehouse Inventory</a>
+            <a href="{% url 'requests:ngo_students_verification_queue' %}" class="sidebar-nav-item"><i class="bi bi-person-vcard"></i> Student Verifications</a>
+            <a href="{% url 'requests:ngo_requests_queue' %}" class="sidebar-nav-item"><i class="bi bi-mortarboard"></i> Book Requests</a>
+            <a href="{% url 'requests:ngo_deliveries_list' %}" class="sidebar-nav-item"><i class="bi bi-truck"></i> Deliveries &amp; Dispatch</a>
+            <a href="{% url 'ngos:service_areas' %}" class="sidebar-nav-item"><i class="bi bi-geo-alt"></i> Service Areas</a>
+            <a href="{% url 'ngos:staff_list' %}" class="sidebar-nav-item"><i class="bi bi-people"></i> Staff Management</a>
+        </nav>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="dashboard-content">
+        <!-- Organization Header -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+            <div>
+                <h2 class="fw-bold mb-1">{{ ngo.name }}</h2>
+                <div class="text-muted small">Headquarters: {{ ngo.city }}, {{ ngo.state }} &bull; Staff Role: {{ membership.get_role_display }}</div>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'donations:ngo_donations_list' %}" class="btn btn-bb-primary">
+                    <i class="bi bi-gift me-1"></i> Review Donations ({{ stats.pending_donations }})
+                </a>
+                <a href="{% url 'requests:ngo_requests_queue' %}" class="btn btn-bb-secondary">
+                    <i class="bi bi-mortarboard me-1"></i> Allocate Books ({{ stats.pending_requests }})
+                </a>
+            </div>
+        </div>
+
+        <!-- 8-Card Operational Metrics Ribbon -->
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted small fw-semibold text-uppercase">Pending Reviews</span>
+                            <h3 class="fw-bold text-danger mb-0">{{ stats.pending_donations }}</h3>
+                        </div>
+                        <div class="stat-icon danger"><i class="bi bi-hourglass-split"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted small fw-semibold text-uppercase">Pickups Ready</span>
+                            <h3 class="fw-bold text-warning mb-0">{{ stats.scheduled_pickups }}</h3>
+                        </div>
+                        <div class="stat-icon warning"><i class="bi bi-calendar-event"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted small fw-semibold text-uppercase">Pending Inspection</span>
+                            <h3 class="fw-bold text-info mb-0">{{ stats.inspection_needed }}</h3>
+                        </div>
+                        <div class="stat-icon secondary"><i class="bi bi-search"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted small fw-semibold text-uppercase">In Warehouse</span>
+                            <h3 class="fw-bold text-success mb-0">{{ stats.inventory_available }}</h3>
+                        </div>
+                        <div class="stat-icon success"><i class="bi bi-bookshelf"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted small fw-semibold text-uppercase">Student Requests</span>
+                            <h3 class="fw-bold text-primary mb-0">{{ stats.pending_requests }}</h3>
+                        </div>
+                        <div class="stat-icon primary"><i class="bi bi-mortarboard"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted small fw-semibold text-uppercase">Active Shipments</span>
+                            <h3 class="fw-bold text-dark mb-0">{{ stats.active_deliveries }}</h3>
+                        </div>
+                        <div class="stat-icon primary"><i class="bi bi-truck"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted small fw-semibold text-uppercase">Students Fulfilled</span>
+                            <h3 class="fw-bold text-success mb-0">{{ stats.total_fulfilled }}</h3>
+                        </div>
+                        <div class="stat-icon success"><i class="bi bi-box2-heart"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted small fw-semibold text-uppercase">Team Members</span>
+                            <h3 class="fw-bold text-secondary mb-0">{{ stats.staff_count }}</h3>
+                        </div>
+                        <div class="stat-icon secondary"><i class="bi bi-people"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Recent Donations to Process -->
+            <div class="col-lg-6">
+                <div class="card-bb p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">Incoming Book Donations</h5>
+                        <a href="{% url 'donations:ngo_donations_list' %}" class="btn btn-sm btn-outline-primary">View Queue</a>
+                    </div>
+
+                    {% if recent_donations %}
+                        <div class="list-group list-group-flush">
+                            {% for d in recent_donations %}
+                                <div class="list-group-item px-0 py-3 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="fw-bold text-dark">{{ d.title }}</div>
+                                        <div class="small text-muted">{{ d.author }} &bull; Donor: {{ d.donor.full_name }}</div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge badge-{{ d.status|lower }}">{{ d.get_status_display }}</span>
+                                        <a href="{% url 'donations:donation_detail' d.id %}" class="btn btn-sm btn-outline-secondary">Action</a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted small text-center py-4">No donation submissions at this time.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recent Requests to Allocate -->
+            <div class="col-lg-6">
+                <div class="card-bb p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">Incoming Student Requests</h5>
+                        <a href="{% url 'requests:ngo_requests_queue' %}" class="btn btn-sm btn-outline-primary">View Queue</a>
+                    </div>
+
+                    {% if recent_requests %}
+                        <div class="list-group list-group-flush">
+                            {% for r in recent_requests %}
+                                <div class="list-group-item px-0 py-3 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="fw-bold text-dark">{{ r.inventory_copy.book_title }}</div>
+                                        <div class="small text-muted">Student: {{ r.student.full_name }} &bull; {{ r.delivery_city }}</div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge badge-{{ r.status|lower }}">{{ r.get_status_display }}</span>
+                                        <a href="{% url 'requests:ngo_request_review_detail' r.id %}" class="btn btn-sm btn-outline-secondary">Review</a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted small text-center py-4">No student requests awaiting allocation.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

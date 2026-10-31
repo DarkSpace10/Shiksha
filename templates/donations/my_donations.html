@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}My Book Donations — BookBridge{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold mb-1">My Book Donations</h2>
+            <p class="text-muted small mb-0">Track verification, pickup schedules, and impact of your donated books</p>
+        </div>
+        <a href="{% url 'donations:donation_create' %}" class="btn btn-bb-primary">
+            <i class="bi bi-plus-lg me-1"></i> Donate Another Book
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="card-bb p-3 mb-4">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-7">
+                <input type="text" name="q" class="form-control" placeholder="Search by book title, author, or subject..." value="{{ search_query }}">
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">All Donation Statuses</option>
+                    {% for val, label in DonationStatus.choices %}
+                        <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-grid">
+                <button type="submit" class="btn btn-outline-primary">Filter</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Donations List -->
+    {% if page_obj %}
+        <div class="row g-4">
+            {% for donation in page_obj %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card-bb h-100 d-flex flex-column overflow-hidden">
+                        <div class="book-cover-container">
+                            {% if donation.primary_image %}
+                                <img src="{{ donation.primary_image.image.url }}" alt="{{ donation.title }}">
+                            {% else %}
+                                <div class="book-cover-placeholder">
+                                    <i class="bi bi-book display-4"></i>
+                                </div>
+                            {% endif %}
+                            <span class="position-absolute top-0 end-0 m-2 badge badge-{{ donation.status|lower }}">
+                                {{ donation.get_status_display }}
+                            </span>
+                        </div>
+
+                        <div class="p-3 d-flex flex-column flex-grow-1">
+                            <span class="badge bg-light text-dark border small align-self-start mb-2">{{ donation.get_category_display }}</span>
+                            <h5 class="fw-bold mb-1 text-truncate" title="{{ donation.title }}">{{ donation.title }}</h5>
+                            <p class="text-muted small mb-2">By {{ donation.author }}</p>
+
+                            <div class="small text-muted mb-3">
+                                <div><i class="bi bi-building"></i> <strong>NGO:</strong> {{ donation.ngo.name }}</div>
+                                <div><i class="bi bi-calendar"></i> Submitted: {{ donation.created_at|date:"M d, Y" }}</div>
+                            </div>
+
+                            <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
+                                <a href="{% url 'donations:donation_detail' donation.id %}" class="btn btn-sm btn-outline-primary fw-semibold">
+                                    Track Status <i class="bi bi-arrow-right ms-1"></i>
+                                </a>
+                                {% if donation.status in 'SUBMITTED,UNDER_REVIEW,APPROVED,PICKUP_SCHEDULED' %}
+                                    <a href="{% url 'donations:donation_cancel' donation.id %}" class="btn btn-sm btn-outline-danger" data-confirm="Cancel this donation listing?">
+                                        Cancel
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+            <nav class="mt-5">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&status={{ status_filter }}&q={{ search_query }}">Previous</a></li>
+                    {% endif %}
+                    <li class="page-item active"><span class="page-link">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+                    {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&status={{ status_filter }}&q={{ search_query }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="text-center py-5 card-bb p-5">
+            <i class="bi bi-gift display-3 text-muted"></i>
+            <h4 class="mt-3">No donations found</h4>
+            <p class="text-muted">You haven't listed any books for donation yet.</p>
+            <a href="{% url 'donations:donation_create' %}" class="btn btn-bb-primary mt-2">
+                Donate Your First Book
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

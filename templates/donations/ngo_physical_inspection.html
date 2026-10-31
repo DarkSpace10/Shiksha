@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Physical Quality Inspection — {{ donation.title }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <div class="dashboard-sidebar">
+        <div class="mb-4">
+            <h6 class="text-uppercase fw-bold text-muted small">NGO Operations</h6>
+            <div class="fw-bold text-primary">{{ ngo.name }}</div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'dashboard:ngo_dashboard' %}" class="sidebar-nav-item"><i class="bi bi-speedometer2"></i> Overview</a>
+            <a href="{% url 'donations:ngo_donations_list' %}" class="sidebar-nav-item active"><i class="bi bi-gift"></i> Donations Queue</a>
+        </nav>
+    </div>
+
+    <div class="dashboard-content">
+        <div class="card-bb p-4 p-md-5" style="max-width: 850px;">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div class="stat-icon success fs-3 rounded-circle">
+                    <i class="bi bi-patch-check"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">Physical Quality Inspection &amp; Cataloguing</h3>
+                    <p class="text-muted small mb-0">Inspect collected book condition and create inventory SKU for distribution</p>
+                </div>
+            </div>
+
+            <div class="p-3 bg-light rounded-3 mb-4">
+                <div class="row g-2 small">
+                    <div class="col-md-8">
+                        <div class="fw-bold text-dark fs-6">{{ donation.title }}</div>
+                        <div class="text-muted">{{ donation.author }} &bull; {{ donation.get_category_display }}</div>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <span class="badge bg-secondary-subtle text-secondary">Donor Declared: {{ donation.get_declared_condition_display }}</span>
+                    </div>
+                    <div class="col-12 mt-2 pt-2 border-top">
+                        <strong>Donor Condition Notes:</strong> {{ donation.donor_condition_description }}
+                    </div>
+                </div>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Physical Inspection Result <span class="text-danger">*</span></label>
+                        {{ form.decision }}
+                        <div class="form-text">If PASSED, an official Inventory Copy with a unique SKU tracking code is automatically created and published to the student catalogue.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Verified Physical Condition Grade <span class="text-danger">*</span></label>
+                        {{ form.verified_condition }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Warehouse / Facility Storage Shelf <span class="text-danger">*</span></label>
+                        {{ form.location_shelf }}
+                        <div class="form-text">Where this physical book is stored in your facility (e.g. Shelf A-3).</div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Inspector Inspection Notes &amp; Observations</label>
+                        {{ form.inspection_notes }}
+                    </div>
+                    <div class="col-12 mt-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-success px-4 fw-semibold">
+                            <i class="bi bi-check2-circle me-1"></i> Finalize Inspection &amp; Catalogue
+                        </button>
+                        <a href="{% url 'donations:ngo_donations_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

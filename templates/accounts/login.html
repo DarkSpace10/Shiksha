@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign In — BookBridge{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card-bb shadow-sm p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <span class="brand-badge fs-2 mb-2"><i class="bi bi-book-half"></i></span>
+                    <h3 class="fw-bold mt-2">Sign in to BookBridge</h3>
+                    <p class="text-muted small">Enter your credentials to access your portal</p>
+                </div>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {% if next %}
+                        <input type="hidden" name="next" value="{{ next }}">
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Username or Email</label>
+                        {{ form.username_or_email }}
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Password</label>
+                        {{ form.password }}
+                    </div>
+
+                    <button type="submit" class="btn btn-bb-primary w-100 py-2 fw-semibold">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                    </button>
+                </form>
+
+                <div class="border-top mt-4 pt-3 text-center">
+                    <p class="text-muted small mb-2">New to BookBridge? Choose how to join:</p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <a href="{% url 'accounts:register_donor' %}" class="btn btn-sm btn-outline-primary">Donate Books</a>
+                        <a href="{% url 'accounts:register_student' %}" class="btn btn-sm btn-outline-success">Student Access</a>
+                        <a href="{% url 'ngos:register_ngo' %}" class="btn btn-sm btn-outline-dark">Register NGO</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

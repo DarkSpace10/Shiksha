@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Verified Partner NGOs — BookBridge{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <span class="badge bg-light text-primary border px-3 py-1 fw-semibold">Distribution Partners</span>
+        <h1 class="display-6 fw-bold mt-2">Verified Partner NGOs</h1>
+        <p class="text-muted lead mx-auto" style="max-width: 680px;">
+            Independent non-profit organizations approved by BookBridge to collect, physically inspect, and allocate educational books in their respective service regions.
+        </p>
+    </div>
+
+    <!-- Search and Filters Bar -->
+    <div class="card-bb p-3 mb-4">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="q" class="form-control" placeholder="Search NGO name, keywords, or focus..." value="{{ search_query }}">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <select name="city" class="form-select">
+                    <option value="">All Service Cities</option>
+                    {% for city in available_cities %}
+                        <option value="{{ city }}" {% if city_filter == city %}selected{% endif %}>{{ city }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-grid">
+                <button type="submit" class="btn btn-bb-primary">Filter</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- NGOs Grid -->
+    <div class="row g-4">
+        {% if ngos %}
+            {% for ngo in ngos %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card-bb card-bb-interactive h-100 p-4 d-flex flex-column">
+                        <div class="d-flex align-items-start gap-3 mb-3">
+                            <div class="rounded-3 bg-light p-2 border d-flex align-items-center justify-content-center" style="width: 54px; height: 54px; flex-shrink: 0;">
+                                {% if ngo.logo %}
+                                    <img src="{{ ngo.logo.url }}" alt="{{ ngo.name }}" style="max-width: 44px; max-height: 44px; object-fit: contain;">
+                                {% else %}
+                                    <i class="bi bi-building text-primary fs-3"></i>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-1 text-dark">{{ ngo.name }}</h5>
+                                <div class="small text-muted"><i class="bi bi-geo-alt"></i> {{ ngo.city }}, {{ ngo.state }}</div>
+                            </div>
+                        </div>
+
+                        <p class="text-muted small flex-grow-1" style="font-size: 0.85rem;">
+                            {{ ngo.description|truncatewords:25 }}
+                        </p>
+
+                        <div class="mb-3 pt-2 border-top">
+                            <div class="small text-muted mb-1"><strong>Operational Coverage:</strong></div>
+                            <div class="d-flex flex-wrap gap-1">
+                                {% for area in ngo.service_areas.all|slice:":4" %}
+                                    <span class="badge bg-light text-dark border small">{{ area.city }}</span>
+                                {% empty %}
+                                    <span class="badge bg-light text-muted small">Headquarters Area</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-auto">
+                            <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                <i class="bi bi-book"></i> {{ ngo.books_count }} Books in Shelf
+                            </span>
+                            <a href="{% url 'ngos:ngo_detail' ngo.slug %}" class="btn btn-sm btn-outline-primary fw-semibold">
+                                View Profile <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-building-x display-4 text-muted"></i>
+                <h4 class="mt-3">No verified NGOs match your search</h4>
+                <p class="text-muted">Try clearing your filters or search terms.</p>
+                <a href="{% url 'ngos:public_directory' %}" class="btn btn-outline-primary">Reset Filters</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

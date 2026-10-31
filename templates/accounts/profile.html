@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block title %}User Profile &amp; Settings — BookBridge{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card-bb p-4 text-center">
+                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem; font-weight: 700;">
+                    {{ user.username|make_list|first|upper }}
+                </div>
+                <h4 class="fw-bold mb-1">{{ user.full_name }}</h4>
+                <p class="text-muted small mb-2">{{ user.email }}</p>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 mb-3">
+                    {{ user.get_role_display }}
+                </span>
+
+                {% if student_profile %}
+                    <div class="p-3 bg-light rounded-3 text-start mt-2">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small fw-bold">Verification Status:</span>
+                            <span class="badge {% if student_profile.is_verified %}badge-approved{% else %}badge-pending{% endif %}">
+                                {{ student_profile.get_verification_status_display }}
+                            </span>
+                        </div>
+                        <div class="small text-muted mb-1"><strong>Institution:</strong> {{ student_profile.institution_name }}</div>
+                        <div class="small text-muted mb-1"><strong>Course:</strong> {{ student_profile.course_of_study }}</div>
+                        <div class="small text-muted"><strong>ID Number:</strong> {{ student_profile.student_id_number }}</div>
+                    </div>
+                {% endif %}
+
+                {% if donor_profile %}
+                    <div class="p-3 bg-light rounded-3 text-start mt-2">
+                        <div class="small text-muted mb-1"><strong>Total Books Donated:</strong> {{ donor_profile.total_donations_count }}</div>
+                        <div class="small text-muted"><strong>Location:</strong> {{ donor_profile.city }}, {{ donor_profile.state }}</div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card-bb p-4">
+                <h4 class="fw-bold mb-4">Edit Profile Details</h4>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">First Name</label>
+                            {{ form.first_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Last Name</label>
+                            {{ form.last_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Email</label>
+                            {{ form.email }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Phone Contact</label>
+                            {{ form.phone_number }}
+                        </div>
+
+                        {% if donor_profile %}
+                            <div class="col-12 mt-4"><h5 class="fw-bold border-bottom pb-2">Pickup Address</h5></div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Address Line</label>
+                                <input type="text" name="address_line1" class="form-control" value="{{ donor_profile.address_line1 }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">City</label>
+                                <input type="text" name="city" class="form-control" value="{{ donor_profile.city }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">State</label>
+                                <input type="text" name="state" class="form-control" value="{{ donor_profile.state }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Postal Code</label>
+                                <input type="text" name="postal_code" class="form-control" value="{{ donor_profile.postal_code }}">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Pickup Instructions</label>
+                                <textarea name="preferred_pickup_instructions" class="form-control" rows="2">{{ donor_profile.preferred_pickup_instructions }}</textarea>
+                            </div>
+                        {% endif %}
+
+                        {% if student_profile %}
+                            <div class="col-12 mt-4"><h5 class="fw-bold border-bottom pb-2">Delivery Address &amp; Academic Info</h5></div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Institution Name</label>
+                                <input type="text" name="institution_name" class="form-control" value="{{ student_profile.institution_name }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Course / Degree</label>
+                                <input type="text" name="course_of_study" class="form-control" value="{{ student_profile.course_of_study }}">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Delivery Address</label>
+                                <textarea name="delivery_address" class="form-control" rows="2">{{ student_profile.delivery_address }}</textarea>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">City</label>
+                                <input type="text" name="delivery_city" class="form-control" value="{{ student_profile.delivery_city }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">State</label>
+                                <input type="text" name="delivery_state" class="form-control" value="{{ student_profile.delivery_state }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Postal Code</label>
+                                <input type="text" name="delivery_postal_code" class="form-control" value="{{ student_profile.delivery_postal_code }}">
+                            </div>
+                        {% endif %}
+
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-bb-primary px-4">
+                                <i class="bi bi-check-lg me-1"></i> Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            {% if student_profile %}
+                <div class="card-bb p-4 mt-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">Student Verification Documents</h5>
+                        <a href="{% url 'requests:document_upload' %}" class="btn btn-sm btn-outline-success">
+                            <i class="bi bi-cloud-arrow-up me-1"></i> Upload Documents
+                        </a>
+                    </div>
+                    {% if documents %}
+                        <div class="list-group">
+                            {% for doc in documents %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="fw-semibold">{{ doc.document_title }}</div>
+                                        <div class="small text-muted">{{ doc.get_document_type_display }} &bull; Uploaded {{ doc.uploaded_at|date:"M d, Y" }}</div>
+                                    </div>
+                                    <span class="badge {% if doc.is_verified %}bg-success{% else %}bg-secondary{% endif %}">
+                                        {% if doc.is_verified %}Verified{% else %}Pending Review{% endif %}
+                                    </span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted small mb-0">No documents uploaded yet. Upload your Student ID to unlock textbook requests.</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

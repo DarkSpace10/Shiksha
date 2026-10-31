@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify Student — {{ student_profile.user.full_name }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <div class="dashboard-sidebar">
+        <div class="mb-4">
+            <h6 class="text-uppercase fw-bold text-muted small">NGO Operations</h6>
+            <div class="fw-bold text-primary">{{ ngo.name }}</div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'dashboard:ngo_dashboard' %}" class="sidebar-nav-item"><i class="bi bi-speedometer2"></i> Overview</a>
+            <a href="{% url 'requests:ngo_students_verification_queue' %}" class="sidebar-nav-item active"><i class="bi bi-person-vcard"></i> Student Verifications</a>
+        </nav>
+    </div>
+
+    <div class="dashboard-content">
+        <div class="row g-4 justify-content-center">
+            <div class="col-lg-10">
+                <div class="card-bb p-4 p-md-5 mb-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="badge bg-primary-subtle text-primary border small mb-1">{{ student_profile.get_academic_level_display }}</span>
+                            <h3 class="fw-bold text-dark mb-1">{{ student_profile.user.full_name }}</h3>
+                            <p class="text-muted small">@{{ student_profile.user.username }} &bull; {{ student_profile.user.email }} &bull; Phone: {{ student_profile.user.phone_number|default:"N/A" }}</p>
+                        </div>
+                        <span class="badge badge-{{ student_profile.verification_status|lower }} fs-6">
+                            {{ student_profile.get_verification_status_display }}
+                        </span>
+                    </div>
+
+                    <!-- Academic & Need Summary -->
+                    <div class="p-3 bg-light rounded-3 mb-4">
+                        <div class="row g-2 small">
+                            <div class="col-md-6"><strong>Institution:</strong> {{ student_profile.institution_name }}</div>
+                            <div class="col-md-6"><strong>Student ID Number:</strong> {{ student_profile.student_id_number }}</div>
+                            <div class="col-md-6"><strong>Course / Degree:</strong> {{ student_profile.course_of_study }}</div>
+                            <div class="col-md-6"><strong>Expected Graduation:</strong> {{ student_profile.graduation_year|default:"N/A" }}</div>
+                            <div class="col-12 mt-2 pt-2 border-top">
+                                <strong>Statement of Genuine Financial Need:</strong>
+                                <p class="mb-0 text-muted">{{ student_profile.financial_need_statement }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Uploaded Verification Proofs -->
+                    <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">Uploaded Verification Documents</h5>
+                    <div class="list-group mb-4">
+                        {% for doc in student_profile.documents.all %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                                <div>
+                                    <div class="fw-bold"><i class="bi bi-file-earmark-text text-primary me-2"></i>{{ doc.document_title }}</div>
+                                    <div class="small text-muted">{{ doc.get_document_type_display }} &bull; Uploaded {{ doc.uploaded_at|date:"M d, Y" }}</div>
+                                </div>
+                                <div>
+                                    {% if doc.document_file %}
+                                        <a href="{{ doc.document_file.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-box-arrow-up-right me-1"></i> Open Document
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="p-3 text-center text-muted border rounded">
+                                <i class="bi bi-exclamation-circle text-warning fs-4"></i>
+                                <p class="small mb-0 mt-1">No proof documents uploaded yet by student.</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Verification Decision Form -->
+                    <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">Verification Decision &amp; Audit Log</h5>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Verification Determination <span class="text-danger">*</span></label>
+                            {{ form.status }}
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Auditable Review Notes / Justification <span class="text-danger">*</span></label>
+                            {{ form.comments }}
+                            <div class="form-text">Will be recorded in the audit trail and sent to the student as an in-app notice.</div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-bb-primary px-4">Save Verification Status</button>
+                            <a href="{% url 'requests:ngo_students_verification_queue' %}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

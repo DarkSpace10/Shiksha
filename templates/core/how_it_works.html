@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}How It Works — BookBridge Multi-NGO Verification Process{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 fw-semibold">End-to-End Integrity</span>
+        <h1 class="display-5 fw-bold mt-2">The 10-Step Mandatory Workflow</h1>
+        <p class="text-muted lead mx-auto" style="max-width: 720px;">
+            BookBridge eliminates waste, fraud, and misallocation by requiring physical quality checks, verified institutional student records, and audited allocations.
+        </p>
+    </div>
+
+    <!-- Step by Step Timeline Card Flow -->
+    <div class="row g-4 justify-content-center">
+        <div class="col-lg-10">
+            <!-- Phase 1: Donation -->
+            <div class="card-bb p-4 mb-4 border-start border-4 border-primary">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <span class="badge bg-primary fs-6 px-3 py-2 rounded-circle">1</span>
+                    <h4 class="fw-bold mb-0">Phase 1: Donation &amp; Organization Review</h4>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 h-100">
+                            <h6 class="fw-bold text-primary mb-1">Step 1: Donor Registration &amp; Listing</h6>
+                            <p class="text-muted small mb-0">Donor uploads book specifications, academic category, condition notes, and multiple photographs. The donor selects a certified partner NGO covering their area.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 h-100">
+                            <h6 class="fw-bold text-primary mb-1">Step 2: NGO Review &amp; Decision</h6>
+                            <p class="text-muted small mb-0">Authorized NGO staff inspects the digital listing. The NGO can approve, reject, or request clearer photographs/corrections from the donor.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phase 2: Logistics & Inspection -->
+            <div class="card-bb p-4 mb-4 border-start border-4 border-info">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <span class="badge bg-info text-white fs-6 px-3 py-2 rounded-circle">2</span>
+                    <h4 class="fw-bold mb-0">Phase 2: Pickup &amp; Physical Quality Inspection</h4>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3 h-100">
+                            <h6 class="fw-bold text-info mb-1">Step 3: Pickup Scheduling</h6>
+                            <p class="text-muted small mb-0">NGO assigns a designated collection volunteer or courier agent with a confirmed time slot.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3 h-100">
+                            <h6 class="fw-bold text-info mb-1">Step 4: Book Collection</h6>
+                            <p class="text-muted small mb-0">The book is collected from the donor's address and transported to the NGO facility.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3 h-100">
+                            <h6 class="fw-bold text-info mb-1">Step 5: Physical Inspection &amp; SKU</h6>
+                            <p class="text-muted small mb-0">NGO inspector checks binding, intact pages, and wear. If passed, a unique inventory tracking SKU is assigned.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phase 3: Student Verification & Allocation -->
+            <div class="card-bb p-4 mb-4 border-start border-4 border-warning">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <span class="badge bg-warning text-dark fs-6 px-3 py-2 rounded-circle">3</span>
+                    <h4 class="fw-bold mb-0">Phase 3: Student Eligibility &amp; Atomic Allocation</h4>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3 h-100">
+                            <h6 class="fw-bold text-dark mb-1">Step 6: Catalogue Publication</h6>
+                            <p class="text-muted small mb-0">The verified book is published into the searchable catalog. Students search by course, subject, or academic level.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3 h-100">
+                            <h6 class="fw-bold text-dark mb-1">Step 7: Student Request &amp; Purpose</h6>
+                            <p class="text-muted small mb-0">Students explain how the textbook aligns with their syllabus and submit enrollment evidence.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3 h-100">
+                            <h6 class="fw-bold text-dark mb-1">Step 8: NGO Need Verification</h6>
+                            <p class="text-muted small mb-0">NGO verifies academic relevance and genuine financial need. Auto-allocations are strictly prevented.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phase 4: Delivery & Receipt Confirmation -->
+            <div class="card-bb p-4 mb-4 border-start border-4 border-success">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <span class="badge bg-success fs-6 px-3 py-2 rounded-circle">4</span>
+                    <h4 class="fw-bold mb-0">Phase 4: Concurrency-Safe Allocation &amp; Delivery</h4>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 h-100">
+                            <h6 class="fw-bold text-success mb-1">Step 9: Concurrency-Safe Allocation</h6>
+                            <p class="text-muted small mb-0">Using database row-level locking (`select_for_update`), the book is allocated and a tracked delivery job is created.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 h-100">
+                            <h6 class="fw-bold text-success mb-1">Step 10: Tracked Delivery &amp; Receipt Confirmation</h6>
+                            <p class="text-muted small mb-0">Book is dispatched to student address. The student clicks "Confirm Receipt" upon delivery, completing the audit trail.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alternate States Box -->
+            <div class="card-bb p-4 bg-light border-0">
+                <h5 class="fw-bold mb-3"><i class="bi bi-shuffle text-primary me-2"></i>Alternate Workflow Handling</h5>
+                <div class="row g-2 small text-muted">
+                    <div class="col-md-4">&bull; <strong>Correction Requested:</strong> Donor updates photos/details without starting over.</div>
+                    <div class="col-md-4">&bull; <strong>Failed Pickup:</strong> Recorded with reason, ready for rescheduling.</div>
+                    <div class="col-md-4">&bull; <strong>Inspection Failed:</strong> Heavy wear/damaged books rejected before cataloguing.</div>
+                    <div class="col-md-4">&bull; <strong>Waitlisted:</strong> High-demand textbooks placed on waitlist for upcoming copies.</div>
+                    <div class="col-md-4">&bull; <strong>Failed Delivery:</strong> Address issue flagged and handled with student.</div>
+                    <div class="col-md-4">&bull; <strong>Cancelled:</strong> Donors can safely cancel before pickup is completed.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
